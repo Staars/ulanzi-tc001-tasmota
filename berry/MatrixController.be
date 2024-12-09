@@ -1,5 +1,3 @@
-import math
-import json
 import fonts
 
 class MatrixController
@@ -7,8 +5,8 @@ class MatrixController
     var matrix
     var font
     var font_width
-    var row_size
-    var col_size
+    static row_size = 8
+    static col_size = 32
     var long_string
     var long_string_offset
 
@@ -18,14 +16,12 @@ class MatrixController
 
     def init()
         print("MatrixController Init")
-        self.row_size = 8
-        self.col_size = 32
         self.long_string = ""
         self.long_string_offset = 0
 
         self.leds = Leds(
             self.row_size * self.col_size,
-            gpio.pin(gpio.WS2812, 1), # Look up the correct GPIO pin for WS2812 with ID 2 (1 in Berry)
+            32,
             Leds.WS2812_GRB,
             3 # There seems to be an RMT conflict with the default one causing pixel corruption
         )
@@ -42,10 +38,10 @@ class MatrixController
     end
 
     def clear()
-        for i: 0..size(self.matrix.pix_buffer)-1
-            self.matrix.pix_buffer[i] = 0;
+        var pbuf = self.matrix.pixels_buffer()
+        for i:range(0,size(pbuf)-1)
+            pbuf[i] = 0
         end
-
         self.matrix.dirty()
     end
 
@@ -61,7 +57,7 @@ class MatrixController
     # x is the column, y is the row, (0,0) from the top left
     def set_matrix_pixel_color(x, y, color, brightness)
         # if y is odd, reverse the order of y
-        if y % 2 == 1
+        if y & 1 == 1
             x = self.col_size - x - 1
         end
 

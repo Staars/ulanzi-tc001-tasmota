@@ -1,6 +1,3 @@
-import json
-import string
-
 import BaseClockFace
 
 class BatteryClockFace: BaseClockFace
@@ -23,9 +20,9 @@ class BatteryClockFace: BaseClockFace
 
     def render()
         self.matrixController.clear()
-        var sensors = json.load(tasmota.read_sensors())
-        var value = sensors['ANALOG']['A2']
-
+        import ULP
+        var value = ULP.get_mem(24)
+       
         var x_offset = 2
         var y_offset = 1
         var bat_str = "???"
@@ -35,7 +32,7 @@ class BatteryClockFace: BaseClockFace
             x_offset += 3
         else
             var min = 2000
-            var max = 2600
+            var max = 2700
 
             if value < min
                 value = min
@@ -45,7 +42,7 @@ class BatteryClockFace: BaseClockFace
             end
 
             value = int(((value - min) * 100) / (max - min))
-            bat_str = 'BAT' + string.format("%3i", value) + "%"
+            bat_str = 'BAT' + format("%3i", value) + "%"
 
         end
 

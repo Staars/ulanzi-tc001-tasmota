@@ -1,5 +1,3 @@
-import json
-import math
 import util
 
 import BaseClockFace

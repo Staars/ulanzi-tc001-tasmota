@@ -1,7 +1,4 @@
-import json
-import math
 import util
-import string
 
 import BaseClockFace
 
@@ -27,7 +24,6 @@ class SensorClockFace: BaseClockFace
 
     def render()
         self.matrixController.clear()
-        var sensorInfo = json.load(tasmota.read_sensors())
 
         var x_offset = 2
         var y_offset = 1
@@ -36,9 +32,10 @@ class SensorClockFace: BaseClockFace
         var sensor_reading = ""
         var suffix = ""
 
-
+        import ULP
+        var illuminance = ULP.get_mem(25)/50
         if modes[self.modeIdx] == "illuminance"
-            sensor_reading = string.format("%5i", sensorInfo['ANALOG']['Illuminance1'])
+            sensor_reading = format("%5i", illuminance)
             suffix = "lx"
         end
 

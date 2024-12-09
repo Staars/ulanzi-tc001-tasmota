@@ -1,5 +1,3 @@
-import string
-
 import BaseClockFace
 
 class DateClockFace: BaseClockFace
@@ -30,7 +28,7 @@ class DateClockFace: BaseClockFace
 
         var date_str = ""
         if self.showYear != true
-            date_str = string.format("%02i.%02i", time_data['day'], time_data['month'])
+            date_str = format("%02i.%02i", time_data['day'], time_data['month'])
         else
             date_str = str(time_data["year"])
             x_offset += 2
