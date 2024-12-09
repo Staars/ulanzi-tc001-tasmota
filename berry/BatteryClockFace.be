@@ -2,7 +2,7 @@ import BaseClockFace
 
 class BatteryClockFace: BaseClockFace
     var clockfaceManager
-    var matrixController
+    var matrixController, OutBuf
     var showVoltage
 
     def init(clockfaceManager)
@@ -13,6 +13,7 @@ class BatteryClockFace: BaseClockFace
         self.needs_render = true
 
         self.showVoltage = false
+        self.OutBuf = bytes(-(3 * 32)) # width * RGB
     end
 
     def handleActionButton()
@@ -22,7 +23,7 @@ class BatteryClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.matrixController.scroll_matrix(0)
+        self.matrixController.scroll_matrix(0, self.OutBuf)
         self.matrixController.leds.show();
         # print("Redraw took", tasmota.millis() - start, "ms")
     end
@@ -54,10 +55,10 @@ class BatteryClockFace: BaseClockFace
 
             value = int(((value - min) * 100) / (max - min))
             bat_str = 'BAT' + format("%3i", value) + "%"
-            self.needs_render = false
         end
 
         self.matrixController.print_string(bat_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        self.needs_render = false
     end
 end
 

@@ -84,7 +84,7 @@ class MatrixController
         self.leds.set_pixel_color(y * self.col_size + x, self.prev_corrected_color)        
     end
 
-    def _reverse_line(buffer) # for RGB only ATM
+    def _reverse_line(buffer) # for RGB only ATM - no RGBA yet
         var px_size = self.leds.pixel_size()
         var len = size(buffer)
         var pos = 0
@@ -98,17 +98,15 @@ class MatrixController
         return buffer.reverse()
     end
 
-    def scroll_matrix(direction, inshift, outshift) # 0 - up, 1 - right, 2 - down, 3 left
+    def scroll_matrix(direction, outshift, inshift) # 0 - up, 1 - left, 2 - down, 3 - right ; outshift madatory, inshift optional
         var buf = self.leds.pixels_buffer()
         var px_size = self.leds.pixel_size()
         var w = self.matrix.w
         var h = self.matrix.h
         var sz = w * px_size
-        var selfScroll = (inshift == nil && outshift == nil)
         if direction%2 == 0 #up/down
-            var line_copy
-            if direction == 0
-                line_copy = self._reverse_line(buf[0..sz-1])
+            if direction == 0 #up
+                outshift.setbytes(0,self._reverse_line(buf[0..sz-1]))
                 var line = 0
                 while line < (h-1)
                     var pos = 0
@@ -125,53 +123,43 @@ class MatrixController
                     end
                     line += 1
                 end
-                if h%2 == 0
-                    line_copy = line_copy
+                if h%2 == 1
+                    outshift.setbytes(0,self._reverse_line(outshift))
                 end
-                buf.setbytes((h-1) * sz,line_copy)
-            else
-                line_copy = buf[size(buf)-sz..]
+                buf.setbytes((h-1) * sz, outshift)
+            else # down
+                outshift = buf[size(buf)-sz..]
                 var line = h - 1
                 while line > 0
                     buf.setbytes(line * sz,self._reverse_line(buf[(line-1) * sz..line * sz-1]))
                     line -= 1
                 end
-                if h%2 == 0
-                    line_copy = self._reverse_line(line_copy)
+                if h%2 == 1
+                    outshift = self._reverse_line(outshift)
                 end
-                buf.setbytes(0, line_copy)
+                buf.setbytes(0, outshift)
             end
         else # left/right
             var pixel_copy = bytes(-px_size)
             var line = 0
             var step = px_size
-            if direction == 1
-                step *= 1
+            if direction == 3 # right
+                step *= -1
             end
             while line < h
                 pos = line * sz
                 if step > 0
                     var line_end = pos + sz - step
-                    if outshift == nil
-                        pixel_copy[0] = buf[pos]
-                        pixel_copy[1] = buf[pos+1]
-                        pixel_copy[2] = buf[pos+2]
-                    else
-                        outshift[(line * 3)] = buf[pos]
-                        outshift[(line * 3) + 1] = buf[pos+1]
-                        outshift[(line * 3) + 2] = buf[pos+2]
-                    end
+                    outshift[(line * 3)] = buf[pos]
+                    outshift[(line * 3) + 1] = buf[pos+1]
+                    outshift[(line * 3) + 2] = buf[pos+2]
                     while pos < line_end
                         buf[pos] = buf[pos+3]
                         buf[pos+1] = buf[pos+4]
                         buf[pos+2] = buf[pos+5]
                         pos += step
                     end
-                    if inshift == nil && outshift == nil
-                        buf[line_end] = pixel_copy[0]
-                        buf[line_end+1] = pixel_copy[1]
-                        buf[line_end+2] = pixel_copy[2]
-                    elif inshift == nil && outshift != nil
+                    if inshift == nil
                         buf[line_end] = outshift[(line * 3)]
                         buf[line_end+1] = outshift[(line * 3) + 1]
                         buf[line_end+2] = outshift[(line * 3) + 2]
@@ -183,26 +171,16 @@ class MatrixController
                 else
                     var line_end = pos
                     pos = pos + sz + step
-                    if outshift == nil
-                        pixel_copy[0] = buf[pos]
-                        pixel_copy[1] = buf[pos+1]
-                        pixel_copy[2] = buf[pos+2]
-                    else
-                        outshift[(line * 3)] = buf[pos]
-                        outshift[(line * 3) + 1] = buf[pos+1]
-                        outshift[(line * 3) + 2] = buf[pos+2]
-                    end
+                    outshift[(line * 3)] = buf[pos]
+                    outshift[(line * 3) + 1] = buf[pos+1]
+                    outshift[(line * 3) + 2] = buf[pos+2]
                     while pos > line_end
                         buf[pos] = buf[pos-3]
                         buf[pos+1] = buf[pos-2]
                         buf[pos+2] = buf[pos-1]
                         pos += step
                     end
-                    if inshift == nil && outshift == nil
-                        buf[line_end] = pixel_copy[0]
-                        buf[line_end+1] = pixel_copy[1]
-                        buf[line_end+2] = pixel_copy[2]
-                    elif inshift == nil && outshift != nil
+                    if inshift == nil
                         buf[line_end] = outshift[(line * 3)]
                         buf[line_end+1] = outshift[(line * 3) + 1]
                         buf[line_end+2] = outshift[(line * 3) + 2]

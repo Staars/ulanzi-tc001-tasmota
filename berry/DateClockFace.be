@@ -2,7 +2,7 @@ import BaseClockFace
 
 class DateClockFace: BaseClockFace
     var clockfaceManager
-    var matrixController
+    var matrixController, OutBuf
     var showYear
     var needs_render
     var offscreen
@@ -17,6 +17,7 @@ class DateClockFace: BaseClockFace
 
         self.showYear = false
         self.needs_render = true
+        self.OutBuf = bytes(-(3 * 8)) # height * RGB
     end
 
     def handleActionButton()
@@ -26,7 +27,7 @@ class DateClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.matrixController.scroll_matrix(1)
+        self.matrixController.scroll_matrix(3,self.OutBuf)
         self.matrixController.leds.show();
         # print("Redraw took", tasmota.millis() - start, "ms")
     end

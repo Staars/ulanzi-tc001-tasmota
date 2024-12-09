@@ -1,7 +1,7 @@
 import BaseClockFace
 
 class BasicClockFace: BaseClockFace
-    var showSecondsDots
+    var showSecondsDots, OutBuf
 
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
@@ -10,6 +10,7 @@ class BasicClockFace: BaseClockFace
         self.matrixController.clear();
 
         self.showSecondsDots = false
+        self.OutBuf = bytes(-(3 * 32)) # width * RGB
     end
 
     def handleActionButton()
@@ -20,7 +21,7 @@ class BasicClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.matrixController.scroll_matrix(1)
+        self.matrixController.scroll_matrix(2,self.OutBuf)
         self.matrixController.leds.show();
         # print("Redraw took", tasmota.millis() - start, "ms")
     end

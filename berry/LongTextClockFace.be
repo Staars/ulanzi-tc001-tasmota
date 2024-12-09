@@ -6,7 +6,7 @@ import MatrixController
 class LongTextClockFace: BaseClockFace
     var clockfaceManager
     var matrixController
-    var needs_render, offscreen, inOutBuf
+    var needs_render, offscreen, inOutBuf, trashOutBuf
     var textPosition, text
     var scrollsLeft
 
@@ -22,6 +22,7 @@ class LongTextClockFace: BaseClockFace
         self.text = "THIS IS A VERY LONG TEXT MESSAGE, THAT WOULD NEVER FIT ON THE SCREEN OF A ULANZI CLOCK !  "
         self.needs_render = true
         self.inOutBuf = bytes(-(3 * 8)) # height * RGB
+        self.trashOutBuf = bytes(-(3 * 8)) # height * RGB
     end
 
 
@@ -32,8 +33,8 @@ class LongTextClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.offscreen.scroll_matrix(1, nil, self.inOutBuf) # 1 - to left, no input buffer, output - inOutBuf
-        self.matrixController.scroll_matrix(1,self.inOutBuf) # 1 - to left, input inOutBuf, no output
+        self.offscreen.scroll_matrix(1, self.inOutBuf) # 1 - to left, output - inOutBuf, no input buffer
+        self.matrixController.scroll_matrix(1, self.trashOutBuf, self.inOutBuf) # 1 - to left, unused output, input inOutBuf
         self.matrixController.leds.show();
         self.scrollsLeft -= 1
         if self.scrollsLeft > 0 return end

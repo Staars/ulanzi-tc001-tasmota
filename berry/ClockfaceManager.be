@@ -13,11 +13,11 @@ import NetClockFace
 var clockFaces = [
     LongTextClockFace,
     DateClockFace,
+    BatteryClockFace,
     BasicClockFace,
     SecondsClockFace,
     DepthClockFace,
     GPSClockFace,
-    BatteryClockFace,
     SensorClockFace,
     NetClockFace
 ];
