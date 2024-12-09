@@ -1,17 +1,15 @@
 def min(x, y)
     if x < y
         return x
-    else 
-        return y
-    end
+    end 
+    return y
 end
 
 def max(x, y)
     if x > y
         return x
-    else 
-        return y
-    end
+    end 
+    return y
 end
 
 def splitStringToChunks(value, chunkSize)

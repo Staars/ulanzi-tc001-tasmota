@@ -3,6 +3,7 @@ import introspect
 class BaseClockFace
     var clockfaceManager
     var matrixController
+    var needs_render
 
     var hasValue
     var value
@@ -18,6 +19,8 @@ class BaseClockFace
         print(classname(self), "DeInit");
     end
 
+    def loop()
+    end
 
     def render()
         self.matrixController.clear()

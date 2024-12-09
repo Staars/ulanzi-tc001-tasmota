@@ -17,6 +17,14 @@ class BasicClockFace: BaseClockFace
         tasmota.cmd("buzzer")
     end
 
+    def loop()
+        if self.needs_render == true return end
+        # var start = tasmota.millis()
+        self.matrixController.scroll_matrix(1)
+        self.matrixController.leds.show();
+        # print("Redraw took", tasmota.millis() - start, "ms")
+    end
+
     def render()
         self.matrixController.clear()
         var rtc = tasmota.rtc()

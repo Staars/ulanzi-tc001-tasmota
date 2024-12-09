@@ -2,6 +2,7 @@ import MatrixController
 
 import BasicClockFace
 import DateClockFace
+import LongTextClockFace
 import SecondsClockFace
 import DepthClockFace
 import GPSClockFace
@@ -10,8 +11,9 @@ import SensorClockFace
 import NetClockFace
 
 var clockFaces = [
-    BasicClockFace,
+    LongTextClockFace,
     DateClockFace,
+    BasicClockFace,
     SecondsClockFace,
     DepthClockFace,
     GPSClockFace,
@@ -32,7 +34,7 @@ class ClockfaceManager
     def init()
         import fonts
         print("ClockfaceManager Init");
-        self.matrixController = MatrixController();
+        self.matrixController = MatrixController(32,8);
 
         self.brightness = 40;
         self.color = fonts.palette[self.getColor()]
@@ -60,18 +62,18 @@ class ClockfaceManager
     end
 
     def initULP()
-        import ULP
-        if int(tasmota.cmd("status 2")["StatusFWR"]["Core"]) == 2
-          ULP.adc_config(6,3,3) # battery
-          ULP.adc_config(7,3,3) # light
-        else
-          ULP.adc_config(6,3,12) # battery
-          ULP.adc_config(7,3,12) # light
-        end
-        ULP.wake_period(0,1000 * 1000) # timer register 0 - every 1000 millisecs - max possible value !!
-        var c = bytes().fromb64("dWxwAAwAXAAAAAwAcwGAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHKDAYByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHKTAYByDAAAaAAAALA=") 
-        ULP.load(c) 
-        ULP.run() 
+        # import ULP
+        # if int(tasmota.cmd("status 2")["StatusFWR"]["Core"]) == 2
+        #   ULP.adc_config(6,3,3) # battery
+        #   ULP.adc_config(7,3,3) # light
+        # else
+        #   ULP.adc_config(6,3,12) # battery
+        #   ULP.adc_config(7,3,12) # light
+        # end
+        # ULP.wake_period(0,1000 * 1000) # timer register 0 - every 1000 millisecs - max possible value !!
+        # var c = bytes().fromb64("dWxwAAwAXAAAAAwAcwGAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHKDAYByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHKTAYByDAAAaAAAALA=") 
+        # ULP.load(c) 
+        # ULP.run() 
     end
 
     def on_button_prev(value, trigger, msg)
@@ -106,7 +108,7 @@ class ClockfaceManager
     end
 
     def autoChangeFace()
-        if self.changeCounter == 20
+        if self.changeCounter == 30
             self.on_button_next()
             self.changeCounter = 0
         end
@@ -120,6 +122,10 @@ class ClockfaceManager
         self.autoChangeFace()
     end
 
+    def every_50ms()
+        self.currentClockFace.loop()
+    end
+
     def redraw()
         #var start = tasmota.millis()
 
@@ -130,9 +136,10 @@ class ClockfaceManager
     end
 
     def update_brightness_from_sensor()
-        import ULP
+        # import ULP
         import math
-        var illuminance = ULP.get_mem(25)/50
+        # var illuminance = ULP.get_mem(25)/50
+        var illuminance = 100
         var brightness = int(10 * math.log(illuminance))
         if brightness < 10
             brightness = 10;
@@ -143,6 +150,7 @@ class ClockfaceManager
         # print("Brightness: ", self.brightness, ", Illuminance: ", illuminance);
 
         self.brightness = brightness;
+        self.brightness = 255; # emulator!!
     end
 
     def save_before_restart()

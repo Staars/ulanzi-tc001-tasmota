@@ -5,8 +5,8 @@ class MatrixController
     var matrix
     var font
     var font_width
-    static row_size = 8
-    static col_size = 32
+    var row_size
+    var col_size
     var long_string
     var long_string_offset
 
@@ -14,11 +14,14 @@ class MatrixController
     var prev_brightness
     var prev_corrected_color
 
-    def init()
+    var override_leds
+
+    def init(w,h)
         print("MatrixController Init")
         self.long_string = ""
         self.long_string_offset = 0
-
+        self.col_size = w
+        self.row_size = h
         self.leds = Leds(
             self.row_size * self.col_size,
             32,
@@ -29,6 +32,8 @@ class MatrixController
         self.matrix = self.leds.create_matrix(self.col_size, self.row_size)
 
         self.change_font('MatrixDisplay3x5')
+
+        self.leds.set_bri(255) # for emulator
 
         self.clear()
 
@@ -70,12 +75,147 @@ class MatrixController
         if brightness != self.prev_brightness || color != self.prev_color
             self.prev_brightness = brightness
             self.prev_color = color
-            self.prev_corrected_color = self.to_gamma(color, brightness)
+            self.prev_corrected_color = self.leds.to_gamma(color, brightness)
         end
 
         # call the native function directly, bypassing set_matrix_pixel_color, to_gamma etc
         # this is faster as otherwise to_gamma would be called for every single pixel even if they are the same
-        self.leds.call_native(10, y * self.col_size + x, self.prev_corrected_color)
+        # self.leds.call_native(10, y * self.col_size + x, self.prev_corrected_color)
+        self.leds.set_pixel_color(y * self.col_size + x, self.prev_corrected_color)        
+    end
+
+    def _reverse_line(buffer) # for RGB only ATM
+        var px_size = self.leds.pixel_size()
+        var len = size(buffer)
+        var pos = 0
+        var b0
+        while pos < len
+            b0 = buffer[pos]
+            buffer[pos] = buffer[pos+2]
+            buffer[pos+2] = b0
+            pos += px_size
+        end
+        return buffer.reverse()
+    end
+
+    def scroll_matrix(direction, inshift, outshift) # 0 - up, 1 - right, 2 - down, 3 left
+        var buf = self.leds.pixels_buffer()
+        var px_size = self.leds.pixel_size()
+        var w = self.matrix.w
+        var h = self.matrix.h
+        var sz = w * px_size
+        var selfScroll = (inshift == nil && outshift == nil)
+        if direction%2 == 0 #up/down
+            var line_copy
+            if direction == 0
+                line_copy = self._reverse_line(buf[0..sz-1])
+                var line = 0
+                while line < (h-1)
+                    var pos = 0
+                    var offset_dst = line * sz
+                    var offset_src = ((line+2) * sz) - px_size
+                    while pos < sz
+                        var dst = pos + offset_dst
+                        var src = offset_src - pos
+                        buf[dst] = buf[src]
+                        buf[dst+1] = buf[src+1]
+                        buf[dst+2] = buf[src+2]
+                        if px_size == 4 buf[dst+3] = buf[src+3] end
+                        pos += px_size
+                    end
+                    line += 1
+                end
+                if h%2 == 0
+                    line_copy = line_copy
+                end
+                buf.setbytes((h-1) * sz,line_copy)
+            else
+                line_copy = buf[size(buf)-sz..]
+                var line = h - 1
+                while line > 0
+                    buf.setbytes(line * sz,self._reverse_line(buf[(line-1) * sz..line * sz-1]))
+                    line -= 1
+                end
+                if h%2 == 0
+                    line_copy = self._reverse_line(line_copy)
+                end
+                buf.setbytes(0, line_copy)
+            end
+        else # left/right
+            var pixel_copy = bytes(-px_size)
+            var line = 0
+            var step = px_size
+            if direction == 1
+                step *= 1
+            end
+            while line < h
+                pos = line * sz
+                if step > 0
+                    var line_end = pos + sz - step
+                    if outshift == nil
+                        pixel_copy[0] = buf[pos]
+                        pixel_copy[1] = buf[pos+1]
+                        pixel_copy[2] = buf[pos+2]
+                    else
+                        outshift[(line * 3)] = buf[pos]
+                        outshift[(line * 3) + 1] = buf[pos+1]
+                        outshift[(line * 3) + 2] = buf[pos+2]
+                    end
+                    while pos < line_end
+                        buf[pos] = buf[pos+3]
+                        buf[pos+1] = buf[pos+4]
+                        buf[pos+2] = buf[pos+5]
+                        pos += step
+                    end
+                    if inshift == nil && outshift == nil
+                        buf[line_end] = pixel_copy[0]
+                        buf[line_end+1] = pixel_copy[1]
+                        buf[line_end+2] = pixel_copy[2]
+                    elif inshift == nil && outshift != nil
+                        buf[line_end] = outshift[(line * 3)]
+                        buf[line_end+1] = outshift[(line * 3) + 1]
+                        buf[line_end+2] = outshift[(line * 3) + 2]
+                    else
+                        buf[line_end] = inshift[(line * 3)]
+                        buf[line_end+1] = inshift[(line * 3) + 1]
+                        buf[line_end+2] = inshift[(line * 3) + 2]
+                    end
+                else
+                    var line_end = pos
+                    pos = pos + sz + step
+                    if outshift == nil
+                        pixel_copy[0] = buf[pos]
+                        pixel_copy[1] = buf[pos+1]
+                        pixel_copy[2] = buf[pos+2]
+                    else
+                        outshift[(line * 3)] = buf[pos]
+                        outshift[(line * 3) + 1] = buf[pos+1]
+                        outshift[(line * 3) + 2] = buf[pos+2]
+                    end
+                    while pos > line_end
+                        buf[pos] = buf[pos-3]
+                        buf[pos+1] = buf[pos-2]
+                        buf[pos+2] = buf[pos-1]
+                        pos += step
+                    end
+                    if inshift == nil && outshift == nil
+                        buf[line_end] = pixel_copy[0]
+                        buf[line_end+1] = pixel_copy[1]
+                        buf[line_end+2] = pixel_copy[2]
+                    elif inshift == nil && outshift != nil
+                        buf[line_end] = outshift[(line * 3)]
+                        buf[line_end+1] = outshift[(line * 3) + 1]
+                        buf[line_end+2] = outshift[(line * 3) + 2]
+                    else
+                        buf[line_end] = inshift[(line * 3)]
+                        buf[line_end+1] = inshift[(line * 3) + 1]
+                        buf[line_end+2] = inshift[(line * 3) + 2]
+                    end
+                end
+                step *= -1
+                line += 1
+            end
+        end
     end
 
     # set pixel column to binary value
@@ -134,16 +274,16 @@ class MatrixController
 
     # Taken straight from the tasmota berry source-code
     # https://github.com/arendst/Tasmota/blob/e9d1e8c7250d89a24ade0c42a64731d6c492bbb2/lib/libesp32/berry_tasmota/src/embedded/leds.be#L158-L172
-    def to_gamma(rgbw, bri)
-       bri = (bri != nil) ? bri : 100
-       var r = tasmota.scale_uint(bri, 0, 100, 0, (rgbw & 0xFF0000) >> 16)
-       var g = tasmota.scale_uint(bri, 0, 100, 0, (rgbw & 0x00FF00) >> 8)
-       var b = tasmota.scale_uint(bri, 0, 100, 0, (rgbw & 0x0000FF))
+    # def to_gamma(rgbw, bri)
+    #    bri = (bri != nil) ? bri : 100
+    #    var r = tasmota.scale_uint(bri, 0, 100, 0, (rgbw & 0xFF0000) >> 16)
+    #    var g = tasmota.scale_uint(bri, 0, 100, 0, (rgbw & 0x00FF00) >> 8)
+    #    var b = tasmota.scale_uint(bri, 0, 100, 0, (rgbw & 0x0000FF))
 
-       return light.gamma8(r) << 16 |
-              light.gamma8(g) <<  8 |
-              light.gamma8(b)
-    end
+    #    return light.gamma8(r) << 16 |
+    #           light.gamma8(g) <<  8 |
+    #           light.gamma8(b)
+    # end
 end
 
 return MatrixController

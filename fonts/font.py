@@ -44,10 +44,21 @@ def save_hex_strings_to_file(hex_strings, filename):
             f.write(f"'{char}': [{hex_string}],\n")
         f.write("}")
 
+def save_hex_strings_to_bytes_file(hex_strings, filename):
+    with open(filename, 'w') as f:
+        f.write("var font = {\n")
+        for char, hex_string in hex_strings.items():
+            hex_string = hex_string.split(",")
+            buf_string = ""
+            for it in hex_string:
+                buf_string += it.replace("0x","").replace(" ","")
+            f.write(f"'{char}': '{buf_string}',\n")
+        f.write("}")
+
 
 def main():
-    point_size = 16
-    font_path = os.path.join(".", "fonts", "3x5MatrixDisplay.ttf")
+    point_size = 7
+    font_path = os.path.join(".", "Arcade.ttf")
     characters = [char for char in string.ascii_uppercase]
     characters += [char for char in string.ascii_lowercase]
     characters += [char for char in string.digits]
@@ -57,8 +68,10 @@ def main():
     characters.remove("'")
     characters.remove("\\")
     hex_strings = generate_hex_strings(font_path, point_size, characters)
-    filename = "./fonts/hex_strings.txt"
+    filename = "./hex_strings.txt"
     save_hex_strings_to_file(hex_strings, filename)
+    filename = "./hex_strings_bytes.txt"
+    save_hex_strings_to_bytes_file(hex_strings, filename)
 
 
 if __name__ == "__main__":
