@@ -5,7 +5,7 @@ class DateClockFace: BaseClockFace
     var matrixController, OutBuf
     var showYear
     var needs_render
-    var offscreen
+    var offscreen, scrollDirection, scrollIdx
 
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
@@ -13,11 +13,11 @@ class DateClockFace: BaseClockFace
         self.matrixController.change_font('Glance');
         self.matrixController.clear();
 
-        self.offscreen = Leds(8*8,Leds.WS2812_GRB).create_matrix(8,8,0) # buffer for scrolling
-
         self.showYear = false
         self.needs_render = true
-        self.OutBuf = bytes(-(3 * 8)) # height * RGB
+        self.OutBuf = bytes(-(3 * 32)) # width * RGB aka the greater of width and height
+        self.scrollDirection = 0
+        self.scrollIdx = 0
     end
 
     def handleActionButton()
@@ -27,8 +27,11 @@ class DateClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.matrixController.scroll_matrix(3,self.OutBuf)
+        self.matrixController.scroll_matrix(self.scrollDirection,self.OutBuf)
         self.matrixController.leds.show();
+        self.scrollIdx += 1
+        if self.scrollIdx%32 == 0 self.scrollDirection += 1 end
+        if self.scrollDirection > 3 self.scrollDirection = 0 end
         # print("Redraw took", tasmota.millis() - start, "ms")
     end
 

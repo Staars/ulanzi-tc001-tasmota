@@ -128,7 +128,7 @@ class MatrixController
                 end
                 buf.setbytes((h-1) * sz, outshift)
             else # down
-                outshift = buf[size(buf)-sz..]
+                outshift = self._reverse_line(buf[size(buf)-sz..])
                 var line = h - 1
                 while line > 0
                     buf.setbytes(line * sz,self._reverse_line(buf[(line-1) * sz..line * sz-1]))
