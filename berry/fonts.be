@@ -310,9 +310,8 @@ var Arcade = {
 }
 
 
-
-var fonts = module("fonts")
 #@ solidify:fonts
+var fonts = module("fonts")
 
 fonts.font_map = {
     'TinyUnicode': { 'font' : TinyUnicode, 'width' : 5 },
