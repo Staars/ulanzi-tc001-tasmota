@@ -1,5 +1,3 @@
-#@ solidify:fonts
-
 var TinyUnicode = {
 'A': [0x60, 0x90, 0xf0, 0x90, 0x90],
 'B': [0xe0, 0x90, 0xe0, 0x90, 0xe0],
@@ -314,6 +312,7 @@ var Arcade = {
 
 
 var fonts = module("fonts")
+#@ solidify:fonts
 
 fonts.font_map = {
     'TinyUnicode': { 'font' : TinyUnicode, 'width' : 5 },
