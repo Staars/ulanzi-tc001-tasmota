@@ -29,7 +29,7 @@ class BatteryClockFace: BaseClockFace
         end
         self.scrollDelay = 3
         # var start = tasmota.millis()
-        self.matrixController.scroll_matrix(0, self.OutBuf)
+        self.matrixController.matrix.scroll(0, self.OutBuf)
         self.matrixController.leds.show();
         # print("Redraw took", tasmota.millis() - start, "ms")
     end

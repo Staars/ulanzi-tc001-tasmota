@@ -15,7 +15,7 @@ class LongTextClockFace: BaseClockFace
 
         self.matrixController.change_font('Arcade');
         self.matrixController.clear();
-        self.offscreen = MatrixController(8,8)
+        self.offscreen = MatrixController(8,8,1) # dummy gpio
 
         self.offscreen.change_font('Arcade');
         self.textPosition = 0
@@ -33,8 +33,8 @@ class LongTextClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.offscreen.scroll_matrix(1, self.inOutBuf) # 1 - to left, output - inOutBuf, no input buffer
-        self.matrixController.scroll_matrix(1, self.trashOutBuf, self.inOutBuf) # 1 - to left, unused output, input inOutBuf
+        self.offscreen.matrix.scroll(1, self.inOutBuf) # 1 - to left, output - inOutBuf, no input buffer
+        self.matrixController.matrix.scroll(1, self.trashOutBuf, self.inOutBuf) # 1 - to left, unused output, input inOutBuf
         self.matrixController.leds.show();
         self.scrollsLeft -= 1
         if self.scrollsLeft > 0 return end

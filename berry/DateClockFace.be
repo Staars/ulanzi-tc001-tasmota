@@ -27,7 +27,7 @@ class DateClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.matrixController.scroll_matrix(self.scrollDirection,self.OutBuf)
+        self.matrixController.matrix.scroll(self.scrollDirection,self.OutBuf)
         self.matrixController.leds.show();
         self.scrollIdx += 1
         if self.scrollIdx%32 == 0 self.scrollDirection += 1 end

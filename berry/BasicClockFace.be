@@ -21,7 +21,7 @@ class BasicClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.matrixController.scroll_matrix(2,self.OutBuf)
+        self.matrixController.matrix.scroll(2,self.OutBuf)
         self.matrixController.leds.show();
         # print("Redraw took", tasmota.millis() - start, "ms")
     end
