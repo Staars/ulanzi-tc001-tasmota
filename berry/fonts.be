@@ -286,7 +286,7 @@ var Arcade = {
     ' ': 'AAAAAAA=',
     }
 
-var mono6x5 = {
+var Mono65 = {
     'A': 'YLDwkJA=',
     'B': '8JDwkPA=',
     'C': 'YJCAkGA=',
