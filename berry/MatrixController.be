@@ -35,7 +35,7 @@ class MatrixController
 
         self.change_font('MatrixDisplay3x5')
 
-        self.leds.set_bri(255) # for emulator
+        self.leds.set_bri(127) # for emulator
 
         self.clear()
 

@@ -6,7 +6,7 @@ class BasicClockFace: BaseClockFace
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
-        self.matrixController.change_font('Glance');
+        self.matrixController.change_font('Arcade');
         self.matrixController.clear();
 
         self.showSecondsDots = false
@@ -31,7 +31,7 @@ class BasicClockFace: BaseClockFace
         var rtc = tasmota.rtc()
 
         var time_str = tasmota.strftime('%H:%M', rtc['local'])
-        var x_offset = 4
+        var x_offset = 1
         var y_offset = 0
         self.matrixController.print_string(time_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
 

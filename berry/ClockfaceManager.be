@@ -62,18 +62,18 @@ class ClockfaceManager
     end
 
     def initULP()
-        # import ULP
-        # if int(tasmota.cmd("status 2")["StatusFWR"]["Core"]) == 2
-        #   ULP.adc_config(6,3,3) # battery
-        #   ULP.adc_config(7,3,3) # light
-        # else
-        #   ULP.adc_config(6,3,12) # battery
-        #   ULP.adc_config(7,3,12) # light
-        # end
-        # ULP.wake_period(0,1000 * 1000) # timer register 0 - every 1000 millisecs - max possible value !!
-        # var c = bytes().fromb64("dWxwAAwAXAAAAAwAcwGAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHKDAYByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHKTAYByDAAAaAAAALA=") 
-        # ULP.load(c) 
-        # ULP.run() 
+        import ULP
+        if int(tasmota.cmd("status 2")["StatusFWR"]["Core"]) == 2
+          ULP.adc_config(6,3,3) # battery
+          ULP.adc_config(7,3,3) # light
+        else
+          ULP.adc_config(6,3,12) # battery
+          ULP.adc_config(7,3,12) # light
+        end
+        ULP.wake_period(0,1000 * 1000) # timer register 0 - every 1000 millisecs - max possible value !!
+        var c = bytes().fromb64("dWxwAAwAXAAAAAwAcwGAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHKDAYByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHKTAYByDAAAaAAAALA=") 
+        ULP.load(c) 
+        ULP.run() 
     end
 
     def on_button_prev(value, trigger, msg)
@@ -136,10 +136,10 @@ class ClockfaceManager
     end
 
     def update_brightness_from_sensor()
-        # import ULP
+        import ULP
         import math
-        # var illuminance = ULP.get_mem(25)/50
-        var illuminance = 100
+        var illuminance = ULP.get_mem(25)/50
+        # var illuminance = 100
         var brightness = int(10 * math.log(illuminance))
         if brightness < 10
             brightness = 10;

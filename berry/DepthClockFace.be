@@ -29,7 +29,7 @@ class DepthClockFace: BaseClockFace
             solar_str = format("%3icm", self.value)
         end
 
-        var x_offset = 14
+        var x_offset = 10
         var y_offset = 0
 
         self.matrixController.print_string(solar_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)

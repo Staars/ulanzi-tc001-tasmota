@@ -14,7 +14,7 @@ class BEDClockFace: BaseClockFace
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
-        self.matrixController.change_font('Glance');
+        self.matrixController.change_font('Arcade');
         self.matrixController.clear();
 
         self.hasValue = false

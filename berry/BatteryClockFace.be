@@ -37,9 +37,9 @@ class BatteryClockFace: BaseClockFace
     def render()
         if self.needs_render == false return end
         self.matrixController.clear()
-        # import ULP
-        # var value = ULP.get_mem(24)
-        var value = 2700 # emulator
+        import ULP
+        var value = ULP.get_mem(24)
+        # var value = 2700 # emulator
        
         var x_offset = 2
         var y_offset = 1
