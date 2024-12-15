@@ -1,6 +1,7 @@
 import os
 import string
 from PIL import ImageFont
+import base64
 
 
 def print_hex_as_binary(hex_string):
@@ -55,6 +56,19 @@ def save_hex_strings_to_bytes_file(hex_strings, filename):
             f.write(f"'{char}': '{buf_string}',\n")
         f.write("}")
 
+def save_hex_strings_to_b64_file(hex_strings, filename):
+    with open(filename, 'w') as f:
+        f.write("var font = {\n")
+        for char, hex_string in hex_strings.items():
+            hex_string = hex_string.split(",")
+            buf_string = ""
+            for it in hex_string:
+                buf_string += it.replace("0x","").replace(" ","")
+            b = bytes.fromhex(buf_string)
+            base64_bytes = base64.b64encode(b)
+            f.write(f"'{char}': '{base64_bytes.decode("ascii")}',\n")
+        f.write("}")
+
 
 def main():
     point_size = 7
@@ -72,6 +86,8 @@ def main():
     save_hex_strings_to_file(hex_strings, filename)
     filename = "./hex_strings_bytes.txt"
     save_hex_strings_to_bytes_file(hex_strings, filename)
+    filename = "./hex_strings_b64.txt"
+    save_hex_strings_to_b64_file(hex_strings, filename)
 
 
 if __name__ == "__main__":
