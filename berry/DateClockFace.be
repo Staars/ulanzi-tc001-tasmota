@@ -10,7 +10,7 @@ class DateClockFace: BaseClockFace
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
-        self.matrixController.change_font('Arcade');
+        self.matrixController.change_font('Mono65');
         self.matrixController.clear();
 
         self.showYear = false
