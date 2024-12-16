@@ -16,8 +16,8 @@ var clockFaces = [
     BatteryClockFace,
     BasicClockFace,
     SecondsClockFace,
-    DepthClockFace,
-    GPSClockFace,
+    # DepthClockFace,
+    # GPSClockFace,
     SensorClockFace,
     NetClockFace
 ];
