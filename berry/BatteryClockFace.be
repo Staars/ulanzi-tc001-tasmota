@@ -33,9 +33,10 @@ class BatteryClockFace: BaseClockFace
         # print("Redraw took", tasmota.millis() - start, "ms")
     end
 
-    def render()
+    def render(segue)
+        var screen = segue ? self.offscreenController : self.matrixController
         if self.needs_render == false return end
-        self.matrixController.clear()
+        screen.clear()
         import ULP
         var value = ULP.get_mem(24)
         # var value = 2700 # emulator
@@ -62,7 +63,7 @@ class BatteryClockFace: BaseClockFace
             bat_str = 'BAT' + format("%3i", value) + "%"
         end
 
-        self.matrixController.print_string(bat_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        screen.print_string(bat_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
         self.needs_render = false
     end
 end

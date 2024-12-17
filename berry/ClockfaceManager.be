@@ -23,18 +23,20 @@ var clockFaces = [
 ];
 
 class ClockfaceManager
-    var matrixController
+    var matrixController, offscreenController
     var brightness
     var color
     var currentClockFace
     var currentClockFaceIdx
+    var nextClockFace, segueCtr, loop_50ms, outShiftBuffer, trashBuffer
     var changeCounter
 
 
     def init()
         import fonts
-        print("ClockfaceManager Init");
-        self.matrixController = MatrixController(32,8);
+        print("ClockfaceManager Init")
+        self.matrixController = MatrixController(32,8)
+        self.offscreenController = MatrixController(32,8,1)
 
         self.brightness = 40;
         self.color = fonts.palette[self.getColor()]
@@ -44,6 +46,8 @@ class ClockfaceManager
 
         self.currentClockFaceIdx = 0
         self.currentClockFace = clockFaces[self.currentClockFaceIdx](self)
+        self.loop_50ms = /->self.currentClockFace.loop()
+        self.outShiftBuffer = bytes(-96) # 32 * 3
         self.changeCounter = 0
 
         tasmota.add_rule("Button1#State", / value, trigger, msg -> self.on_button_prev(value, trigger, msg))
@@ -123,7 +127,7 @@ class ClockfaceManager
     end
 
     def every_50ms()
-        self.currentClockFace.loop()
+        self.loop_50ms()
     end
 
     def redraw()

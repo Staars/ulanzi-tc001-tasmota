@@ -29,8 +29,9 @@ class BEDClockFace: BaseClockFace
         self.value = number(payload) / 0.1
     end
 
-    def render()
-        self.matrixController.clear()
+    def render(segue)
+        var screen = segue ? self.offscreenController : self.matrixController
+        screen.clear()
         var bed_str = ""
         if self.hasValue
             bed_str = string.format("%3.1f", self.value)

@@ -20,8 +20,10 @@ class SensorClockFace: BaseClockFace
         self.modeIdx = (self.modeIdx + 1) % size(modes)
     end
 
-    def render()
-        self.matrixController.clear()
+    def render(segue)
+        var screen = segue ? self.offscreenController : self.matrixController
+
+        screen.clear()
 
         var x_offset = 2
         var y_offset = 1
@@ -40,7 +42,7 @@ class SensorClockFace: BaseClockFace
 
         sensor_str = sensor_reading + suffix
 
-        self.matrixController.print_string(sensor_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        screen.print_string(sensor_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
     end
 end
 
