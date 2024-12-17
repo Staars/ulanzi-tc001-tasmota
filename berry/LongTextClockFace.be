@@ -5,7 +5,7 @@ import MatrixController
 
 class LongTextClockFace: BaseClockFace
     var clockfaceManager
-    var matrixController
+    var matrixController, offscreenController
     var needs_render, offscreen, inOutBuf, trashOutBuf
     var textPosition, text
     var scrollsLeft
@@ -14,10 +14,8 @@ class LongTextClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('Arcade');
-        self.matrixController.clear();
-        self.offscreen = MatrixController(8,8,1) # dummy gpio
 
-        self.offscreen.change_font('Arcade');
+        # self.offscreenController.change_font('Arcade');
         self.textPosition = 0
         self.text = "THIS IS A VERY LONG TEXT MESSAGE, THAT WOULD NEVER FIT ON THE SCREEN OF A ULANZI CLOCK !  "
         self.needs_render = true
@@ -33,7 +31,7 @@ class LongTextClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.offscreen.matrix.scroll(1, self.inOutBuf) # 1 - to left, output - inOutBuf, no input buffer
+        self.offscreenController.matrix.scroll(1, self.inOutBuf) # 1 - to left, output - inOutBuf, no input buffer
         self.matrixController.matrix.scroll(1, self.trashOutBuf, self.inOutBuf) # 1 - to left, unused output, input inOutBuf
         self.matrixController.leds.show();
         self.scrollsLeft -= 1
@@ -45,16 +43,18 @@ class LongTextClockFace: BaseClockFace
     def nextChar()
         self.scrollsLeft = self.matrixController.font_width + 1
 
-        self.offscreen.clear()
-        self.offscreen.print_char(self.text[self.textPosition], 0, 0, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        self.offscreenController.clear()
+        self.offscreenController.print_char(self.text[self.textPosition], 0, 0, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
         self.textPosition += 1
 
         if self.textPosition == (size(self.text)-1) self.textPosition = 0 end
     end
 
-    def render()
+    def render(segue)
+        var screen = segue ? self.offscreenController : self.matrixController
         if self.needs_render == false return end
-        self.matrixController.clear()
+        screen.clear()
+        if segue == true return end
         self.nextChar()
         self.needs_render = false
     end

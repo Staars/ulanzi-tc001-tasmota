@@ -7,7 +7,6 @@ class BasicClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('Mono65');
-        self.matrixController.clear();
 
         self.showSecondsDots = false
         self.OutBuf = bytes(-(3 * 32)) # width * RGB
@@ -26,14 +25,16 @@ class BasicClockFace: BaseClockFace
         # print("Redraw took", tasmota.millis() - start, "ms")
     end
 
-    def render()
-        self.matrixController.clear()
+    def render(segue)
+        var screen = segue ? self.offscreenController : self.matrixController
+
+        screen.clear()
         var rtc = tasmota.rtc()
 
         var time_str = tasmota.strftime('%H:%M', rtc['local'])
         var x_offset = 1
         var y_offset = 0
-        self.matrixController.print_string(time_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        screen.print_string(time_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
 
 
 
@@ -41,16 +42,16 @@ class BasicClockFace: BaseClockFace
         var seconds_brightness = self.clockfaceManager.brightness >> 1
 
         if current_seconds >= 12 && self.showSecondsDots
-            self.matrixController.set_matrix_pixel_color(0, 0, self.clockfaceManager.color, seconds_brightness)
+            screen.set_matrix_pixel_color(0, 0, self.clockfaceManager.color, seconds_brightness)
         end
         if current_seconds >= 24 && self.showSecondsDots
-            self.matrixController.set_matrix_pixel_color(31, 0, self.clockfaceManager.color, seconds_brightness)
+            screen.set_matrix_pixel_color(31, 0, self.clockfaceManager.color, seconds_brightness)
         end
         if current_seconds >= 36 && self.showSecondsDots
-            self.matrixController.set_matrix_pixel_color(31, 7, self.clockfaceManager.color, seconds_brightness)
+            screen.set_matrix_pixel_color(31, 7, self.clockfaceManager.color, seconds_brightness)
         end
         if current_seconds >= 48 && self.showSecondsDots
-            self.matrixController.set_matrix_pixel_color(0, 7, self.clockfaceManager.color, seconds_brightness)
+            screen.set_matrix_pixel_color(0, 7, self.clockfaceManager.color, seconds_brightness)
         end
     end
 

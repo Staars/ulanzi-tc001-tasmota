@@ -15,7 +15,6 @@ class BEDClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('Mono65');
-        self.matrixController.clear();
 
         self.hasValue = false
         self.value = 0
@@ -35,7 +34,8 @@ class BEDClockFace: BaseClockFace
     end
 
     def render()
-        self.matrixController.clear()
+        var screen = segue ? self.offscreenController : self.matrixController
+        screen.clear()
         var bed_str = ""
         if self.hasValue
             bed_str = string.format("%3.1f", self.value)
@@ -46,8 +46,8 @@ class BEDClockFace: BaseClockFace
         var x_offset = 2
         var y_offset = 1
 
-        self.matrixController.print_char("\xa5", x_offset, 0, false, fonts.palette['yellow'], self.clockfaceManager.brightness)
-        self.matrixController.print_string(bed_str, x_offset + 12, y_offset, false, fonts.palette['yellow'], self.clockfaceManager.brightness)
+        screen.print_char("\xa5", x_offset, 0, false, fonts.palette['yellow'], self.clockfaceManager.brightness)
+        screen.print_string(bed_str, x_offset + 12, y_offset, false, fonts.palette['yellow'], self.clockfaceManager.brightness)
     end
 
     def handleActionButton()

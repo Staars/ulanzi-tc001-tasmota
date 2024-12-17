@@ -4,14 +4,13 @@ class DateClockFace: BaseClockFace
     var clockfaceManager
     var matrixController, OutBuf
     var showYear
-    var needs_render
+
     var offscreen, scrollDirection, scrollIdx
 
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('Mono65');
-        self.matrixController.clear();
 
         self.showYear = false
         self.needs_render = true
@@ -36,9 +35,10 @@ class DateClockFace: BaseClockFace
     end
 
 
-    def render()
+    def render(segue)
+        var screen = segue ? self.offscreenController : self.matrixController
         if self.needs_render == false return end
-        self.matrixController.clear()
+        screen.clear()
         var rtc = tasmota.rtc()
 
         var time_data = tasmota.time_dump(rtc['local'])
@@ -53,7 +53,7 @@ class DateClockFace: BaseClockFace
             x_offset += 2
         end
 
-        self.matrixController.print_string(date_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        screen.print_string(date_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
 
         self.needs_render = false
     end

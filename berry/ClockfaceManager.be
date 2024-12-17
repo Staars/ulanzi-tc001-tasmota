@@ -23,11 +23,12 @@ var clockFaces = [
 ];
 
 class ClockfaceManager
-    var matrixController
+    var matrixController, offscreenController
     var brightness
     var color
     var currentClockFace
     var currentClockFaceIdx
+    var nextClockFace, segueCtr, loop_50ms, outShiftBuffer, trashBuffer
     var changeCounter
 
 
@@ -35,6 +36,7 @@ class ClockfaceManager
         import fonts
         print("ClockfaceManager Init");
         self.matrixController = MatrixController(32,8);
+        self.offscreenController = MatrixController(32,8,1);
 
         self.brightness = 40;
         self.color = fonts.palette[self.getColor()]
@@ -44,6 +46,8 @@ class ClockfaceManager
 
         self.currentClockFaceIdx = 0
         self.currentClockFace = clockFaces[self.currentClockFaceIdx](self)
+        self.loop_50ms = self.currentClockFace.loop
+        self.outShiftBuffer = bytes(-96) # 32 * 3
         self.changeCounter = 0
 
         tasmota.add_rule("Button1#State", / value, trigger, msg -> self.on_button_prev(value, trigger, msg))
@@ -70,21 +74,22 @@ class ClockfaceManager
           ULP.adc_config(6,3,12) # battery
           ULP.adc_config(7,3,12) # light
         end
-        ULP.wake_period(0,1000 * 1000) # timer register 0 - every 1000 millisecs - max possible value !!
-        var c = bytes().fromb64("dWxwAAwAXAAAAAwAcwGAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHKDAYByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHKTAYByDAAAaAAAALA=") 
+        ULP.wake_period(0,100 * 1000) # timer register 0 - every 100 millisecs
+        var c = bytes().fromb64("dWxwAAwAaAAAABAAowGAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHKzAYByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHLDAYByDAAAaBEC2C7TAYByDAAAaAAAALA=") 
         ULP.load(c) 
         ULP.run() 
     end
+# (ulp_last_result_battery = 0x5000006c) -> ULP.get_mem(27) 
+# (ulp_last_result_internal_temperature = 0x50000074) -> ULP.get_mem(29) (val − 32) × 5/9 -> Celsius
+# (ulp_last_result_light = 0x50000070) -> ULP.get_mem(28) 
+# (ulp_sample_counter = 0x50000068) -> ULP.get_mem(26) 
+
 
     def on_button_prev(value, trigger, msg)
         print(value)
         print(trigger)
         print(msg)
-
-        self.currentClockFaceIdx = (self.currentClockFaceIdx + (size(clockFaces) - 1)) % size(clockFaces)
-        self.currentClockFace = clockFaces[self.currentClockFaceIdx](self)
-
-        self.redraw()
+        self.initSegue(-1)
     end
 
     def on_button_action(value, trigger, msg)
@@ -100,11 +105,7 @@ class ClockfaceManager
         # print(value)
         # print(trigger)
         # print(msg)
-
-        self.currentClockFaceIdx = (self.currentClockFaceIdx + 1) % size(clockFaces)
-        self.currentClockFace = clockFaces[self.currentClockFaceIdx](self)
-
-        self.redraw()
+        self.initSegue(1)
     end
 
     def autoChangeFace()
@@ -115,6 +116,28 @@ class ClockfaceManager
         self.changeCounter += 1
     end
 
+    def segueFace(steps)
+        self.currentClockFaceIdx = (self.currentClockFaceIdx + steps) % size(clockFaces)
+        self.nextClockFace = clockFaces[self.currentClockFaceIdx](self)
+        self.nextClockFace.render(true)
+        self.segueCtr = 8
+        self.trashBuffer = bytes(-96)
+        self.loop_50ms = self.doSegue
+    end
+
+    def initSegue()
+        self.offscreenController.scroll(0,self.outShiftBuffer)
+        self.matrixController.scroll(0,self.trashBuffer,self.outShiftBuffer)
+        self.segueCtr -= 1
+        if self.segueCtr == 0
+            self.currentClockFace = self.nextClockFace
+            self.nextClockFace = nil
+            self.trashBuffer = nil
+            self.loop_50ms = self.currentClockFace.loop
+            self.redraw()
+        end
+    end
+
     # This will be called automatically every 1s by the tasmota framework
     def every_second()
         self.update_brightness_from_sensor();
@@ -123,7 +146,7 @@ class ClockfaceManager
     end
 
     def every_50ms()
-        self.currentClockFace.loop()
+        self.loop_50ms()
     end
 
     def redraw()

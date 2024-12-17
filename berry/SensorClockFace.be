@@ -13,7 +13,6 @@ class SensorClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('MatrixDisplay3x5');
-        self.matrixController.clear();
 
         self.modeIdx = 0
     end
@@ -22,8 +21,9 @@ class SensorClockFace: BaseClockFace
         self.modeIdx = (self.modeIdx + 1) % size(modes)
     end
 
-    def render()
-        self.matrixController.clear()
+    def render(segue)
+        var screen = segue ? self.offscreenController : self.matrixController
+        screen.clear()
 
         var x_offset = 2
         var y_offset = 1
@@ -33,7 +33,7 @@ class SensorClockFace: BaseClockFace
         var suffix = ""
 
         import ULP
-        var illuminance = ULP.get_mem(25)/50
+        var illuminance = ULP.get_mem(28)
         # var illuminance = 50
         if modes[self.modeIdx] == "illuminance"
             sensor_reading = format("%5i", illuminance)
@@ -42,7 +42,7 @@ class SensorClockFace: BaseClockFace
 
         sensor_str = sensor_reading + suffix
 
-        self.matrixController.print_string(sensor_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        screen.print_string(sensor_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
     end
 end
 

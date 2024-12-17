@@ -18,7 +18,6 @@ class NetClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('MatrixDisplay3x5');
-        self.matrixController.clear();
 
         self.modeIdx = 0
         self.page = 0
@@ -31,8 +30,9 @@ class NetClockFace: BaseClockFace
         self.displayTimeCounter = 0
     end
 
-    def render()
-        self.matrixController.clear()
+    def render(segue)
+        var screen = segue ? self.offscreenController : self.matrixController
+        screen.clear()
         var wifiInfo = tasmota.wifi()
 
         var x_offset = 1
@@ -81,7 +81,7 @@ class NetClockFace: BaseClockFace
             self.displayTimeCounter = 0
         end
 
-        self.matrixController.print_string(wifi_str, x_offset, y_offset, true, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        screen.print_string(wifi_str, x_offset, y_offset, true, self.clockfaceManager.color, self.clockfaceManager.brightness)
     end
 end
 

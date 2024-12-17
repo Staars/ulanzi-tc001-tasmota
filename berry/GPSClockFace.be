@@ -15,7 +15,6 @@ class GPSClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('MatrixDisplay3x5');
-        self.matrixController.clear();
 
         self.hasSpeed = true
         self.speed = 8.2
@@ -32,8 +31,9 @@ class GPSClockFace: BaseClockFace
         self.showSpeed = !self.showSpeed
     end
 
-    def render()
-        self.matrixController.clear()
+    def render(segue)
+        var screen = segue ? self.offscreenController : self.matrixController
+        screen.clear()
         var _str = "Speed?"
         var x_offset = 0
         var y_offset = 1
@@ -47,7 +47,7 @@ class GPSClockFace: BaseClockFace
                 _str = format("%s", self.heading)
             end
         end
-            self.matrixController.print_string(_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        screen.print_string(_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
     end
 
 end
