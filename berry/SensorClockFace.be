@@ -5,8 +5,6 @@ import BaseClockFace
 var modes = ['illuminance']
 
 class SensorClockFace: BaseClockFace
-    var clockfaceManager
-    var matrixController
     var modeIdx
 
     def init(clockfaceManager)

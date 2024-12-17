@@ -4,9 +4,7 @@ import BaseClockFace
 import MatrixController
 
 class LongTextClockFace: BaseClockFace
-    var clockfaceManager
-    var matrixController
-    var needs_render, offscreen, inOutBuf, trashOutBuf
+    var offscreen, inOutBuf, trashOutBuf
     var textPosition, text
     var scrollsLeft
 

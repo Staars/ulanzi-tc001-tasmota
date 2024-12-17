@@ -8,8 +8,6 @@ var pageDisplayTime = 2;
 var modes = ['rssi', 'ip', 'mac']
 
 class NetClockFace: BaseClockFace
-    var clockfaceManager
-    var matrixController
     var modeIdx
     var page
     var displayTimeCounter

@@ -1,8 +1,6 @@
 import BaseClockFace
 
 class SecondsClockFace: BaseClockFace
-    var clockfaceManager
-    var matrixController
 
     def init(clockfaceManager)
         super(self).init(clockfaceManager);

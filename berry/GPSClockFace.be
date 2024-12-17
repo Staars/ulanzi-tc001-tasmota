@@ -3,8 +3,6 @@ import fonts
 import BaseClockFace
 
 class GPSClockFace: BaseClockFace
-    var clockfaceManager
-    var matrixController
     var showSpeed
     var hasSpeed
     var speed

@@ -1,8 +1,7 @@
 import BaseClockFace
 
 class BatteryClockFace: BaseClockFace
-    var clockfaceManager
-    var matrixController, OutBuf, scrollDelay
+    var OutBuf, scrollDelay
     var showVoltage
 
     def init(clockfaceManager)

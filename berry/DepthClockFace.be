@@ -3,11 +3,6 @@ import fonts
 import BaseClockFace
 
 class DepthClockFace: BaseClockFace
-    var clockfaceManager
-    var matrixController
-
-    var hasValue
-    var value
 
     def init(clockfaceManager)
         super(self).init(clockfaceManager);

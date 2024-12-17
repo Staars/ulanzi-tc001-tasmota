@@ -1,10 +1,8 @@
 import BaseClockFace
 
 class DateClockFace: BaseClockFace
-    var clockfaceManager
-    var matrixController, OutBuf
     var showYear
-    var needs_render
+    var OutBuf
     var offscreen, scrollDirection, scrollIdx
 
     def init(clockfaceManager)

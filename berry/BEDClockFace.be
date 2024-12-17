@@ -5,11 +5,6 @@ import string
 import BaseClockFace
 
 class BEDClockFace: BaseClockFace
-    var clockfaceManager
-    var matrixController
-
-    var hasValue
-    var value
 
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
