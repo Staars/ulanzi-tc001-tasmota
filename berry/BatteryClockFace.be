@@ -33,7 +33,7 @@ class BatteryClockFace: BaseClockFace
     end
 
     def render(segue)
-        var screen = segue ? self.offscreenController : self.matrixController
+        var screen = segue == true ? self.offscreenController : self.matrixController
         if self.needs_render == false return end
         screen.clear()
         import ULP

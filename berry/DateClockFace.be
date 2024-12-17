@@ -34,7 +34,7 @@ class DateClockFace: BaseClockFace
 
     def render(segue)
         if self.needs_render == false return end
-        var screen = segue ? self.offscreenController : self.matrixController
+        var screen = segue == true ? self.offscreenController : self.matrixController
         screen.clear()
         var rtc = tasmota.rtc()
 

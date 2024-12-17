@@ -117,7 +117,7 @@ class ClockfaceManager
     def doSegue()
         self.offscreenController.matrix.scroll(0,self.outShiftBuffer)
         self.matrixController.matrix.scroll(0,self.trashBuffer,self.outShiftBuffer)
-        self.matrixController.leds.show()
+        self.matrixController.draw()
         self.segueCtr -= 1
         if self.segueCtr == 0
             print("Segue done")
@@ -129,7 +129,7 @@ class ClockfaceManager
     end
 
     def autoChangeFace()
-        if self.changeCounter == 30
+        if self.changeCounter == 10
             self.on_button_next()
             self.changeCounter = 0
         end
@@ -138,6 +138,7 @@ class ClockfaceManager
 
     # This will be called automatically every 1s by the tasmota framework
     def every_second()
+        if self.segueCtr != 0 return end
         self.update_brightness_from_sensor();
         self.redraw()
         self.autoChangeFace()

@@ -15,7 +15,8 @@ class LongTextClockFace: BaseClockFace
 
         self.offscreenController.change_font('Arcade');
         self.textPosition = 0
-        self.text = "THIS IS A VERY LONG TEXT MESSAGE, THAT WOULD NEVER FIT ON THE SCREEN OF A ULANZI CLOCK !  "
+        #self.text = "THIS IS A VERY LONG TEXT MESSAGE, THAT WOULD NEVER FIT ON THE SCREEN OF A ULANZI CLOCK !  "
+        self.text = tasmota.cmd("status 5").tostring()
         self.needs_render = true
         self.trashOutBuf = bytes(-(3 * 8)) # height * RGB
     end
