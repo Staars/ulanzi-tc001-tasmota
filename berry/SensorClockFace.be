@@ -11,7 +11,6 @@ class SensorClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('MatrixDisplay3x5');
-        self.matrixController.clear();
 
         self.modeIdx = 0
     end

@@ -35,7 +35,7 @@ class ClockfaceManager
     def init()
         import fonts
         print("ClockfaceManager Init")
-        self.matrixController = MatrixController(32,8)
+        self.matrixController = MatrixController(32,8,32)
         self.offscreenController = MatrixController(32,8,1)
 
         self.brightness = 40;
@@ -48,7 +48,9 @@ class ClockfaceManager
         self.currentClockFace = clockFaces[self.currentClockFaceIdx](self)
         self.loop_50ms = /->self.currentClockFace.loop()
         self.outShiftBuffer = bytes(-96) # 32 * 3
+        self.trashBuffer = bytes(-96)
         self.changeCounter = 0
+        self.segueCtr = 0
 
         tasmota.add_rule("Button1#State", / value, trigger, msg -> self.on_button_prev(value, trigger, msg))
         tasmota.add_rule("Button2#State", / value, trigger, msg -> self.on_button_action(value, trigger, msg))
@@ -84,11 +86,7 @@ class ClockfaceManager
         print(value)
         print(trigger)
         print(msg)
-
-        self.currentClockFaceIdx = (self.currentClockFaceIdx + (size(clockFaces) - 1)) % size(clockFaces)
-        self.currentClockFace = clockFaces[self.currentClockFaceIdx](self)
-
-        self.redraw()
+        self.initSegue(-1)
     end
 
     def on_button_action(value, trigger, msg)
@@ -104,11 +102,30 @@ class ClockfaceManager
         # print(value)
         # print(trigger)
         # print(msg)
+        self.initSegue(1)
+    end
 
-        self.currentClockFaceIdx = (self.currentClockFaceIdx + 1) % size(clockFaces)
-        self.currentClockFace = clockFaces[self.currentClockFaceIdx](self)
+    def initSegue(steps)
+        self.currentClockFaceIdx = (self.currentClockFaceIdx + steps) % size(clockFaces)
+        self.nextClockFace = clockFaces[self.currentClockFaceIdx](self)
+        print("Init seque to",classname(self.nextClockFace))
+        self.nextClockFace.render(true)
+        self.segueCtr = 8
+        self.loop_50ms = /->self.doSegue()
+    end
 
-        self.redraw()
+    def doSegue()
+        self.offscreenController.matrix.scroll(0,self.outShiftBuffer)
+        self.matrixController.matrix.scroll(0,self.trashBuffer,self.outShiftBuffer)
+        self.matrixController.leds.show()
+        self.segueCtr -= 1
+        if self.segueCtr == 0
+            print("Segue done")
+            self.currentClockFace = self.nextClockFace
+            self.nextClockFace = nil
+            self.loop_50ms = /->self.currentClockFace.loop()
+            self.redraw()
+        end
     end
 
     def autoChangeFace()

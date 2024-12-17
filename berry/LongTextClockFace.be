@@ -12,8 +12,6 @@ class LongTextClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('Arcade');
-        self.matrixController.clear();
-        # self.offscreenController = MatrixController(8,8,1) # dummy gpio
 
         self.offscreenController.change_font('Arcade');
         self.textPosition = 0
@@ -54,6 +52,7 @@ class LongTextClockFace: BaseClockFace
         var screen = segue ? self.offscreenController : self.matrixController
         screen.clear()
         self.nextChar()
+        if segue == true return end
         self.needs_render = false
     end
 

@@ -8,7 +8,6 @@ class DepthClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('MatrixDisplay3x5');
-        self.matrixController.clear();
         self.hasValue = true
         self.value = 150
     end

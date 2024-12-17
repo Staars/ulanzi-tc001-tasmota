@@ -6,7 +6,6 @@ class SecondsClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('MatrixDisplay3x5');
-        self.matrixController.clear();
     end
 
     def render(segue)

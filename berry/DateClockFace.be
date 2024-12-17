@@ -2,18 +2,16 @@ import BaseClockFace
 
 class DateClockFace: BaseClockFace
     var showYear
-    var OutBuf
     var scrollDirection, scrollIdx
 
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
         self.matrixController.change_font('Mono65');
-        self.matrixController.clear();
 
         self.showYear = false
         self.needs_render = true
-        self.OutBuf = bytes(-(3 * 32)) # width * RGB aka the greater of width and height
+        # self.OutBuf = bytes(-(3 * 32)) # width * RGB aka the greater of width and height
         self.scrollDirection = 0
         self.scrollIdx = 0
     end
@@ -25,7 +23,7 @@ class DateClockFace: BaseClockFace
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()
-        self.matrixController.matrix.scroll(self.scrollDirection,self.OutBuf)
+        self.matrixController.matrix.scroll(self.scrollDirection,self.clockfaceManager.outShiftBuffer)
         self.matrixController.leds.show();
         self.scrollIdx += 1
         if self.scrollIdx%32 == 0 self.scrollDirection += 1 end
@@ -54,6 +52,7 @@ class DateClockFace: BaseClockFace
 
         screen.print_string(date_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
 
+        if segue == true return end
         self.needs_render = false
     end
 end
