@@ -7,8 +7,7 @@ class BatteryClockFace: BaseClockFace
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
-        self.matrixController.change_font('MatrixDisplay3x5');
-        self.needs_render = true
+        self.clockfaceManager.change_font('MatrixDisplay3x5');
 
         self.showVoltage = false
 
@@ -19,22 +18,8 @@ class BatteryClockFace: BaseClockFace
         self.showVoltage = !self.showVoltage
     end
 
-    def loop()
-        if self.needs_render == true return end
-        if self.scrollDelay > 0
-            self.scrollDelay -= 1
-            return
-        end
-        self.scrollDelay = 3
-        # var start = tasmota.millis()
-        self.matrixController.matrix.scroll(0, self.clockfaceManager.outShiftBuffer)
-        self.matrixController.leds.show();
-        # print("Redraw took", tasmota.millis() - start, "ms")
-    end
-
     def render(segue)
-        var screen = segue == true ? self.offscreenController : self.matrixController
-        if self.needs_render == false return end
+        var screen = segue ? self.offscreenController : self.matrixController
         screen.clear()
         import ULP
         var value = ULP.get_mem(24)
@@ -63,8 +48,6 @@ class BatteryClockFace: BaseClockFace
         end
 
         screen.print_string(bat_str, x_offset, y_offset, false, self.clockfaceManager.color, self.clockfaceManager.brightness)
-        if segue == true return end
-        self.needs_render = false
     end
 end
 

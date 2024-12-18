@@ -11,9 +11,8 @@ class LongTextClockFace: BaseClockFace
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
-        self.matrixController.change_font('Arcade');
+        self.clockfaceManager.change_font('Arcade');
 
-        self.offscreenController.change_font('Arcade');
         self.textPosition = 0
         #self.text = "THIS IS A VERY LONG TEXT MESSAGE, THAT WOULD NEVER FIT ON THE SCREEN OF A ULANZI CLOCK !  "
         self.text = tasmota.cmd("status 5").tostring()

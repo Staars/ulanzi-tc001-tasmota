@@ -82,10 +82,12 @@ class ClockfaceManager
         ULP.run() 
     end
 
+    def change_font(font)
+        self.matrixController.change_font(font);
+        self.offscreenController.change_font(font);
+    end
+
     def on_button_prev(value, trigger, msg)
-        print(value)
-        print(trigger)
-        print(msg)
         self.initSegue(-1)
     end
 
@@ -99,32 +101,32 @@ class ClockfaceManager
     end
 
     def on_button_next(value, trigger, msg)
-        # print(value)
-        # print(trigger)
-        # print(msg)
         self.initSegue(1)
     end
 
     def initSegue(steps)
         self.currentClockFaceIdx = (self.currentClockFaceIdx + steps) % size(clockFaces)
         self.nextClockFace = clockFaces[self.currentClockFaceIdx](self)
-        print("Init seque to",classname(self.nextClockFace))
+        print(classname(self.currentClockFace)," seque to",classname(self.nextClockFace))
         self.nextClockFace.render(true)
         self.segueCtr = 8
-        self.loop_50ms = /->self.doSegue()
+        var direction = steps > 0 ? 0 : 2
+        print(steps, direction)
+        self.loop_50ms = /->self.doSegue(direction)
     end
 
-    def doSegue()
-        self.offscreenController.matrix.scroll(0,self.outShiftBuffer)
-        self.matrixController.matrix.scroll(0,self.trashBuffer,self.outShiftBuffer)
+    def doSegue(direction)
+        self.offscreenController.matrix.scroll(direction, self.outShiftBuffer)
+        self.matrixController.matrix.scroll(direction, self.trashBuffer, self.outShiftBuffer)
         self.matrixController.draw()
+
         self.segueCtr -= 1
         if self.segueCtr == 0
-            print("Segue done")
             self.currentClockFace = self.nextClockFace
             self.nextClockFace = nil
             self.loop_50ms = /->self.currentClockFace.loop()
             self.redraw()
+            print("Segue done",classname(self.currentClockFace),classname(self.nextClockFace))
         end
     end
 
@@ -166,13 +168,12 @@ class ClockfaceManager
         if brightness < 10
             brightness = 10;
         end
-        if brightness > 90
-            brightness = 90;
+        if brightness > 128
+            brightness = 128
         end
         # print("Brightness: ", self.brightness, ", Illuminance: ", illuminance);
 
         self.brightness = brightness;
-        self.brightness = 255; # emulator!!
     end
 
     def save_before_restart()

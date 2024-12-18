@@ -9,8 +9,7 @@ class BEDClockFace: BaseClockFace
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
-        self.matrixController.change_font('Mono65');
-        self.matrixController.clear();
+        self.clockfaceManager.change_font('Mono65');
 
         self.hasValue = false
         self.value = 0

@@ -12,8 +12,7 @@ class GPSClockFace: BaseClockFace
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
-        self.matrixController.change_font('MatrixDisplay3x5');
-        self.matrixController.clear();
+        self.clockfaceManager.change_font('MatrixDisplay3x5');
 
         self.hasSpeed = true
         self.speed = 8.2

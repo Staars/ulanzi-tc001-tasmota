@@ -24,7 +24,6 @@ class BaseClockFace
     end
 
     def render(segue)
-        self.matrixController.clear()
     end
 
 end

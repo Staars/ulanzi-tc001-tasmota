@@ -7,7 +7,7 @@ class DateClockFace: BaseClockFace
     def init(clockfaceManager)
         super(self).init(clockfaceManager);
 
-        self.matrixController.change_font('Mono65');
+        self.clockfaceManager.change_font('Mono65');
 
         self.showYear = false
         self.needs_render = true
@@ -34,7 +34,7 @@ class DateClockFace: BaseClockFace
 
     def render(segue)
         if self.needs_render == false return end
-        var screen = segue == true ? self.offscreenController : self.matrixController
+        var screen = segue ? self.offscreenController : self.matrixController
         screen.clear()
         var rtc = tasmota.rtc()
 
