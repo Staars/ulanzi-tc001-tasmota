@@ -107,11 +107,9 @@ class ClockfaceManager
     def initSegue(steps)
         self.currentClockFaceIdx = (self.currentClockFaceIdx + steps) % size(clockFaces)
         self.nextClockFace = clockFaces[self.currentClockFaceIdx](self)
-        print(classname(self.currentClockFace)," seque to",classname(self.nextClockFace))
         self.nextClockFace.render(true)
         self.segueCtr = 8
         var direction = steps > 0 ? 0 : 2
-        print(steps, direction)
         self.loop_50ms = /->self.doSegue(direction)
     end
 
@@ -126,7 +124,6 @@ class ClockfaceManager
             self.nextClockFace = nil
             self.loop_50ms = /->self.currentClockFace.loop()
             self.redraw()
-            print("Segue done",classname(self.currentClockFace),classname(self.nextClockFace))
         end
     end
 

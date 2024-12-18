@@ -219,11 +219,12 @@ class MatrixController
 
         var char_bitmap = bytes().fromb64(self.font[char])
         var font_height = size(char_bitmap)
+        var y_offset = 7 - font_height
         for i: 0..(font_height-1)
             var code = char_bitmap[i]
             for j: 0..7
                 if code & (1 << (7 - j)) != 0
-                    self.set_matrix_pixel_color(x+j, y+i, color, brightness)
+                    self.set_matrix_pixel_color(x+j, y+i+y_offset, color, brightness)
 
                     if j > actual_width
                         actual_width = j

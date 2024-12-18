@@ -26,7 +26,7 @@ class BatteryClockFace: BaseClockFace
         # var value = 2700 # emulator
        
         var x_offset = 2
-        var y_offset = 1
+        var y_offset = 0
         var bat_str = "???"
 
         if self.showVoltage

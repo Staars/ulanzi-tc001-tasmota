@@ -25,7 +25,7 @@ class SensorClockFace: BaseClockFace
         screen.clear()
 
         var x_offset = 2
-        var y_offset = 1
+        var y_offset = 0
         var sensor_str = "?????"
 
         var sensor_reading = ""

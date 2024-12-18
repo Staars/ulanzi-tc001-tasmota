@@ -20,11 +20,6 @@ class LongTextClockFace: BaseClockFace
         self.trashOutBuf = bytes(-(3 * 8)) # height * RGB
     end
 
-
-    def deinit()
-        super(self).deinit();
-    end
-
     def loop()
         if self.needs_render == true return end
         # var start = tasmota.millis()

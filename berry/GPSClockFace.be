@@ -21,10 +21,6 @@ class GPSClockFace: BaseClockFace
         self.heading = "NO"
     end
 
-    def deinit()
-        super(self).deinit();
-    end
-
     def handleActionButton()
         self.showSpeed = !self.showSpeed
     end
@@ -34,7 +30,7 @@ class GPSClockFace: BaseClockFace
         screen.clear()
         var _str = "Speed?"
         var x_offset = 0
-        var y_offset = 1
+        var y_offset = 0
         if self.showSpeed
             if self.hasSpeed
                 _str = format("%.2fkm/h", self.speed)

@@ -12,10 +12,6 @@ class DepthClockFace: BaseClockFace
         self.value = 150
     end
 
-    def deinit()
-        super(self).deinit();
-    end
-
     def render(segue)
         var screen = segue ? self.offscreenController : self.matrixController
         screen.clear()

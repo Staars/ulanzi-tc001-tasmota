@@ -39,7 +39,7 @@ class BEDClockFace: BaseClockFace
         end
 
         var x_offset = 2
-        var y_offset = 1
+        var y_offset = 0
 
         self.matrixController.print_char("\xa5", x_offset, 0, false, fonts.palette['yellow'], self.clockfaceManager.brightness)
         self.matrixController.print_string(bed_str, x_offset + 12, y_offset, false, fonts.palette['yellow'], self.clockfaceManager.brightness)
