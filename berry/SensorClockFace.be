@@ -1,5 +1,3 @@
-import util
-
 import BaseClockFace
 
 var modes = ['illuminance']
@@ -32,7 +30,7 @@ class SensorClockFace: BaseClockFace
         var suffix = ""
 
         import ULP
-        var illuminance = ULP.get_mem(25)/50
+        var illuminance = ULP.get_mem(28)
         # var illuminance = 50
         if modes[self.modeIdx] == "illuminance"
             sensor_reading = format("%5i", illuminance)

@@ -1,5 +1,3 @@
-import util
-
 import BaseClockFace
 
 var pageSize = 8;

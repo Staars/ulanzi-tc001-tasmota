@@ -9,6 +9,7 @@ import GPSClockFace
 import BatteryClockFace
 import SensorClockFace
 import NetClockFace
+import TsensClockFace
 
 var clockFaces = [
     LongTextClockFace,
@@ -19,7 +20,8 @@ var clockFaces = [
     # DepthClockFace,
     # GPSClockFace,
     SensorClockFace,
-    NetClockFace
+    NetClockFace,
+    TsensClockFace
 ];
 
 class ClockfaceManager
@@ -34,12 +36,15 @@ class ClockfaceManager
 
     def init()
         import fonts
+        import gpio
         print("ClockfaceManager Init")
         self.matrixController = MatrixController(32,8,32)
         self.offscreenController = MatrixController(32,8,1)
 
         self.brightness = 40;
         self.color = fonts.palette[self.getColor()]
+
+        self.initULP()
 
         self.matrixController.print_string("Hello :)", 3, 2, true, self.color, self.brightness)
         self.matrixController.draw()
@@ -52,9 +57,9 @@ class ClockfaceManager
         self.changeCounter = 0
         self.segueCtr = 0
 
-        tasmota.add_rule("Button1#State", / value, trigger, msg -> self.on_button_prev(value, trigger, msg))
-        tasmota.add_rule("Button2#State", / value, trigger, msg -> self.on_button_action(value, trigger, msg))
-        tasmota.add_rule("Button3#State", / value, trigger, msg -> self.on_button_next(value, trigger, msg))
+        gpio.pin_mode(14,gpio.INPUT_PULLUP) # 3
+        gpio.pin_mode(26,gpio.INPUT_PULLUP) # 1
+        gpio.pin_mode(27,gpio.INPUT_PULLUP) # 2
     end
 
     def getColor()
@@ -69,6 +74,8 @@ class ClockfaceManager
 
     def initULP()
         import ULP
+        var c = bytes().fromb64("dWxwAAwAaAAAABAAowGAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHKzAYByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHLDAYByDAAAaBEC2C7TAYByDAAAaAAAALA=") 
+        ULP.load(c) 
         if int(tasmota.cmd("status 2")["StatusFWR"]["Core"]) == 2
           ULP.adc_config(6,3,3) # battery
           ULP.adc_config(7,3,3) # light
@@ -76,9 +83,7 @@ class ClockfaceManager
           ULP.adc_config(6,3,12) # battery
           ULP.adc_config(7,3,12) # light
         end
-        ULP.wake_period(0,1000 * 1000) # timer register 0 - every 1000 millisecs - max possible value !!
-        var c = bytes().fromb64("dWxwAAwAXAAAAAwAcwGAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHKDAYByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHKTAYByDAAAaAAAALA=") 
-        ULP.load(c) 
+        ULP.wake_period(0,50000) # timer register 0 - every 50 millisecs 
         ULP.run() 
     end
 
@@ -87,11 +92,11 @@ class ClockfaceManager
         self.offscreenController.change_font(font);
     end
 
-    def on_button_prev(value, trigger, msg)
+    def on_button_prev()
         self.initSegue(-1)
     end
 
-    def on_button_action(value, trigger, msg)
+    def on_button_action()
         import introspect
         var handleActionMethod = introspect.get(self.currentClockFace, "handleActionButton");
 
@@ -100,7 +105,7 @@ class ClockfaceManager
         end
     end
 
-    def on_button_next(value, trigger, msg)
+    def on_button_next()
         self.initSegue(1)
     end
 
@@ -147,6 +152,18 @@ class ClockfaceManager
         self.loop_50ms()
     end
 
+    def every_100ms()
+        if self.segueCtr != 0 return end
+        if gpio.digital_read(14) == 0
+            self.on_button_next()
+        elif gpio.digital_read(27) == 0
+            self.on_button_action()
+        elif gpio.digital_read(26) == 0
+            self.on_button_prev()
+        end
+        # print(gpio.digital_read(14),gpio.digital_read(26),gpio.digital_read(27))
+    end
+
     def redraw()
         #var start = tasmota.millis()
 
@@ -159,8 +176,7 @@ class ClockfaceManager
     def update_brightness_from_sensor()
         import ULP
         import math
-        var illuminance = ULP.get_mem(25)/50
-        # var illuminance = 100
+        var illuminance = ULP.get_mem(28)/50
         var brightness = int(10 * math.log(illuminance))
         if brightness < 10
             brightness = 10;
@@ -177,13 +193,13 @@ class ClockfaceManager
         # This function may be called on other occasions than just before a restart
         # => We need to make sure that it is in fact a restart
         if tasmota.global.restart_flag == 1 || tasmota.global.restart_flag == 2
-            self.currentClockFace = nil;
-            self.matrixController.change_font('MatrixDisplay3x5');
-            self.matrixController.clear();
+            self.currentClockFace = nil
+            self.matrixController.change_font('MatrixDisplay3x5')
+            self.matrixController.clear()
 
-            self.matrixController.print_string("Reboot...", 0, 2, true, self.color, self.brightness)
-            self.matrixController.draw();
-            print("This is just to add some delay");
+            self.matrixController.print_string("Reboot...", 0, 1, true, self.color, self.brightness)
+            self.matrixController.draw()
+            print("This is just to add some delay")
             print("   ")
             print("According to all known laws of aviation, there is no way a bee should be able to fly.")
             print("Its wings are too small to get its fat little body off the ground.")

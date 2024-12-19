@@ -22,8 +22,7 @@ class BatteryClockFace: BaseClockFace
         var screen = segue ? self.offscreenController : self.matrixController
         screen.clear()
         import ULP
-        var value = ULP.get_mem(24)
-        # var value = 2700 # emulator
+        var value = ULP.get_mem(27)
        
         var x_offset = 2
         var y_offset = 0
