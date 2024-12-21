@@ -20,24 +20,8 @@ class SecondsClockFace: BaseClockFace
             self.img_idx = 0
         end
         self.showImg(self.matrixController)
+        self.matrixController.draw()
     end
-
-    # def showImg_(idx)
-    #     if idx == nil
-    #         idx = 0
-    #     end
-    #     var img_start = idx * 64 * 3
-    #     var buf = self.matrixController.matrix.pix_buffer
-    #     for line:0..7
-    #         var line_offset = line * self.matrixController.matrix.w * 3
-    #         var img_offset = img_start + (line*24)
-    #         if line%2 == 0
-    #             buf.setbytes(line_offset,self.img[img_offset..img_offset+21])
-    #         else
-    #             buf.setbytes(line_offset + ((self.matrixController.matrix.w - 8)*3),self.img[img_offset..img_offset+21])
-    #         end
-    #     end
-    # end
 
     def showImg(screen)
         var img_start = self.img_idx * 64 * 3
