@@ -10,6 +10,7 @@ import BatteryClockFace
 import SensorClockFace
 import NetClockFace
 import TsensClockFace
+import ImgClockFace
 
 var clockFaces = [
     LongTextClockFace,
@@ -21,7 +22,8 @@ var clockFaces = [
     # GPSClockFace,
     SensorClockFace,
     NetClockFace,
-    TsensClockFace
+    TsensClockFace,
+    ImgClockFace
 ];
 
 class ClockfaceManager

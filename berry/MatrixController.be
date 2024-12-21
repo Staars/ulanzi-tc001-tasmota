@@ -32,6 +32,7 @@ class MatrixController
         )
         self.leds.gamma = false
         self.matrix = self.leds.create_matrix(self.col_size, self.row_size)
+        self.matrix.set_alternate(true)
 
         self.change_font('MatrixDisplay3x5')
 
@@ -82,8 +83,8 @@ class MatrixController
 
         # call the native function directly, bypassing set_matrix_pixel_color, to_gamma etc
         # this is faster as otherwise to_gamma would be called for every single pixel even if they are the same
-        # self.leds.call_native(10, y * self.col_size + x, self.prev_corrected_color)
-        self.leds.set_pixel_color(y * self.col_size + x, self.prev_corrected_color)        
+        self.leds.call_native(10, y * self.col_size + x, self.prev_corrected_color)
+        # self.leds.set_pixel_color(y * self.col_size + x, self.prev_corrected_color)        
     end
 
     # def _reverse_line(buffer) # for RGB only ATM - no RGBA yet

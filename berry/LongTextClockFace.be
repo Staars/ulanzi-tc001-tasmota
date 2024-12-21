@@ -12,6 +12,7 @@ class LongTextClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.clockfaceManager.change_font('Arcade');
+        self.clockfaceManager.changeCounter = 30
 
         self.textPosition = 0
         #self.text = "THIS IS A VERY LONG TEXT MESSAGE, THAT WOULD NEVER FIT ON THE SCREEN OF A ULANZI CLOCK !  "
