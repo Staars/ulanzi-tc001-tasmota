@@ -11,8 +11,12 @@ import SensorClockFace
 import NetClockFace
 import TsensClockFace
 import ImgClockFace
+import StartClockFace
+import CalendarClockFace
 
 var clockFaces = [
+    StartClockFace,
+    CalendarClockFace,
     LongTextClockFace,
     DateClockFace,
     BatteryClockFace,
@@ -48,7 +52,7 @@ class ClockfaceManager
 
         self.initULP()
 
-        self.matrixController.print_string("Hello :)", 3, 2, true, self.color, self.brightness)
+        self.matrixController.print_string("booting", 0, 0, true, self.color, self.brightness)
         self.matrixController.draw()
 
         self.currentClockFaceIdx = 0
@@ -137,7 +141,7 @@ class ClockfaceManager
     def autoChangeFace()
         if self.changeCounter == 10
             self.on_button_next()
-            self.changeCounter = 0
+            self.changeCounter = 1 # 0 only on boot
         end
         self.changeCounter += 1
     end

@@ -1,22 +1,37 @@
 from PIL import Image, ImageSequence
-import io
 import requests
 
 
-fname = 'img.gif'
-id ='23041'
-url = 'https://developer.lametric.com/content/apps/icon_thumbs/'+id+'_icon_thumb.gif'
+fname = 'img'
+ftype = '.gif'
+id =  64761
+
+page_start = int(id/10000)
+url = 'https://developer.lametric.com/api/v2/icons?page='+ str(page_start) + "&page_size=10000"
+
 r = requests.get(url)
-open(fname , 'wb').write(r.content)
+j = r.json()
+for icon in j['data']:
+    if icon['id'] == id:
+        print("Found image id",icon['id'],"with title:",icon['title'])
+        fname = icon['title'].replace(' ','_')
+url = 'https://developer.lametric.com/content/apps/icon_thumbs/'+str(id)+'_icon_thumb'+ftype
+r = requests.get(url)
+if r.text.startswith('<!DOCTYPE html>'):
+    print("This is probably no GIF, let's try PNG ...")
+    ftype = '.png'
+    url = 'https://developer.lametric.com/content/apps/icon_thumbs/'+str(id)+'_icon_thumb'+ftype
+    r = requests.get(url)
+    if r.text.startswith('<!DOCTYPE html>'):
+        print('Nope, PNG failed too .. giving up!')
+        exit()
+open(fname + ftype , 'wb').write(r.content)
 
-# Opening the input gif:
-im = Image.open("img.gif")
+# Opening the input image:
+im = Image.open(fname + ftype)
 
-# create an empty list to store the frames
-frames = []
-
-# iterate over the frames of the gif as save
-f = open("img.bin","wb")
+# iterate over the frames of the GIF or use the one from PNG as save
+f = open(fname + '.bin',"wb")
 buf = bytearray()
 image_counter = 0
 for frame in ImageSequence.Iterator(im):
@@ -34,10 +49,7 @@ for frame in ImageSequence.Iterator(im):
             buf.append(r)
             buf.append(g)
             buf.append(b)
-            # print(r,g,b)
-    #frame.save(imgByteArr,frame=image.format)
-    #imgByteArr = imgByteArr.getvalue()
 
 f.write(buf)
 f.close()
-print(len(buf),image_counter)
+print("Raw data size:",len(buf),"bytes, image number:",image_counter)

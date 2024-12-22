@@ -8,19 +8,10 @@ class SecondsClockFace: BaseClockFace
         super(self).init(clockfaceManager);
 
         self.clockfaceManager.change_font('MatrixDisplay3x5');
-        var f = open("img.bin","r")
+        var f = open("Tasmota.bin","r")
         self.img = f.readbytes()
         f.close()
         self.img_idx = 0
-    end
-
-    def loop()
-        self.img_idx += 1
-        if self.img_idx > (size(self.img)/64/3) - 1
-            self.img_idx = 0
-        end
-        self.showImg(self.matrixController)
-        self.matrixController.draw()
     end
 
     def showImg(screen)
@@ -41,13 +32,12 @@ class SecondsClockFace: BaseClockFace
         screen.clear()
 
         self.showImg(screen)
-        var rtc = tasmota.rtc()
 
-        var time_str = tasmota.strftime('%H:%M', rtc['local'])
-        var x_offset = 12
+        var hello_str = '...GO!'
+        var x_offset = 9
         var y_offset = 0
 
-        screen.print_string(time_str, x_offset, y_offset, true, self.clockfaceManager.color, self.clockfaceManager.brightness)
+        screen.print_string(hello_str, x_offset, y_offset, true, 0x444444, self.clockfaceManager.brightness)
     end
 end
 
