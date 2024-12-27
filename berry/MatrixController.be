@@ -81,8 +81,8 @@ class MatrixController
 
         # call the native function directly, bypassing set_matrix_pixel_color, to_gamma etc
         # this is faster as otherwise to_gamma would be called for every single pixel even if they are the same
-        self.leds.call_native(10, y * self.col_size + x, self.prev_corrected_color)
-        # self.leds.set_pixel_color(y * self.col_size + x, self.prev_corrected_color)        
+        # self.leds.call_native(10, y * self.col_size + x, self.prev_corrected_color)
+        self.leds.set_pixel_color(y * self.col_size + x, self.prev_corrected_color)        
     end
 
     # set pixel column to binary value
@@ -98,6 +98,10 @@ class MatrixController
     def print_char(char, x, y, collapse, color, brightness)
         var actual_width = collapse ? -1 : self.font_width
 
+        if char == " "
+            return self.font_width - 2 # no collapse to zero
+        end
+
         if self.font.contains(char) == false
             print("Font does not contain char: ", char)
             return 0
@@ -108,10 +112,9 @@ class MatrixController
         var y_offset = 7 - font_height
         for i: 0..(font_height-1)
             var code = char_bitmap[i]
-            for j: 0..7
+            for j: 0..self.font_width
                 if code & (1 << (7 - j)) != 0
                     self.set_matrix_pixel_color(x+j, y+i+y_offset, color, brightness)
-
                     if j > actual_width
                         actual_width = j
                     end
