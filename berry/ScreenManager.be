@@ -31,6 +31,7 @@ class ScreenManager
     def init()
         import fonts
         import gpio
+        import mqtt
         print("ScreenManager Init")
 
         var matrix_width = 32
@@ -58,6 +59,8 @@ class ScreenManager
         gpio.pin_mode(14,gpio.INPUT_PULLUP) # 3
         gpio.pin_mode(26,gpio.INPUT_PULLUP) # 1
         gpio.pin_mode(27,gpio.INPUT_PULLUP) # 2
+
+        mqtt.subscribe("ulanzi_alert")
     end
 
     def initULP()
@@ -191,6 +194,10 @@ class ScreenManager
         # print("Brightness: ", self.brightness, ", Illuminance: ", illuminance);
 
         self.brightness = brightness;
+    end
+
+    def mqtt_data(topic, idx, payload, bindata)
+        self.alert(payload)
     end
 
     def save_before_restart()
