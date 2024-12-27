@@ -23,6 +23,7 @@
 #include "soc/soc_ulp.h"
 #include "example_config.h"
 #include "soc/sens_reg.h"
+#include "soc/rtc_io_reg.h"
 
 	.set adc_channel_battery, 6
 	.set adc_channel_light, 7
@@ -50,6 +51,14 @@ last_result_light:
 
 	.global last_result_internal_temperature
 last_result_internal_temperature:
+	.long 0
+
+	.global last_result_gpios_low
+last_result_gpios_low:
+	.long 0
+
+	.global last_result_gpios_high
+last_result_gpios_high:
 	.long 0
 
 	/* Code goes into .text section */
@@ -108,6 +117,17 @@ measure_tsens:
     READ_RTC_FIELD(SENS_SAR_SLAVE_ADDR3_REG, SENS_TSENS_OUT)
 	/* value is now in r0; store it into last_result_internal_temperature */
 	move r3, last_result_internal_temperature
+	st r0, r3, 0
+
+read_gpios:
+    /* Read the value of lower 16 RTC IOs into R0 */
+	READ_RTC_REG(RTC_GPIO_IN_REG, RTC_GPIO_IN_NEXT_S, 16)
+	/* value is now in r0; store it into last_result_internal_temperature */
+	move r3, last_result_gpios_low
+	st r0, r3, 0
+	/* Read the value of RTC IOs 16-17, into R0 */
+	READ_RTC_REG(RTC_GPIO_IN_REG, RTC_GPIO_IN_NEXT_S + 16, 2)
+	move r3, last_result_gpios_high
 	st r0, r3, 0
 
 

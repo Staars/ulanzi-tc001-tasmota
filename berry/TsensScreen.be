@@ -17,7 +17,7 @@ class TsensScreen: BaseScreen
         var y_offset = 0
 
         import ULP
-        var tsens = (ULP.get_mem(29) - 32.0) * 5 / 9
+        var tsens = (ULP.get_mem(35) - 32.0) * 5 / 9
 
         var sensor_str = format("%.2f C", tsens)
 

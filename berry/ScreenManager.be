@@ -56,17 +56,13 @@ class ScreenManager
         self.changeCounter = 0
         self.segueCtr = 0
 
-        gpio.pin_mode(14,gpio.INPUT_PULLUP) # 3
-        gpio.pin_mode(26,gpio.INPUT_PULLUP) # 1
-        gpio.pin_mode(27,gpio.INPUT_PULLUP) # 2
-
         mqtt.subscribe("ulanzi_alert")
     end
 
     def initULP()
         import ULP
-        var c = bytes().fromb64("dWxwAAwAaAAAABAAowGAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHKzAYByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHLDAYByDAAAaBEC2C7TAYByDAAAaAAAALA=") 
-        ULP.load(c) 
+        var c = bytes().fromb64("dWxwAAwAgAAAABgAAwKAcg4AANAaAAByDgAAaAAAgHIAAEB0HQAAUBAAAHAQAAB0EAAGhUAAwHITAoByDAAAaAAAgHIAAEB0IQAAUBAAAHAQAAB0EAAGhUAAwHIjAoByDAAAaBEC2C4zAoByDAAAaAkBuC5DAoByDAAAaAkB+C9TAoByDAAAaAAAALA=") 
+        ULP.load(c)         
         if int(tasmota.cmd("status 2")["StatusFWR"]["Core"]) == 2
           ULP.adc_config(6,3,3) # battery
           ULP.adc_config(7,3,3) # light
@@ -74,6 +70,15 @@ class ScreenManager
           ULP.adc_config(6,3,12) # battery
           ULP.adc_config(7,3,12) # light
         end
+
+        # gpio.pin_mode(14,gpio.INPUT_PULLUP) # 3
+        # gpio.pin_mode(26,gpio.INPUT_PULLUP) # 1
+        # gpio.pin_mode(27,gpio.INPUT_PULLUP) # 2
+
+        ULP.gpio_init(14, 0) # RTC_GPIO16, RTC_GPIO_MODE_INPUT_ONLY
+        ULP.gpio_init(26, 0) # RTC_GPIO7,  RTC_GPIO_MODE_INPUT_ONLY
+        ULP.gpio_init(27, 0) # RTC_GPIO17, RTC_GPIO_MODE_INPUT_ONLY
+
         ULP.wake_period(0,50000) # timer register 0 - every 50 millisecs 
         ULP.run() 
     end
@@ -166,12 +171,18 @@ class ScreenManager
 
     def every_100ms()
         if self.segueCtr != 0 return end
-        if gpio.digital_read(14) == 0
-            self.on_button_next()
-        elif gpio.digital_read(27) == 0
-            self.on_button_action()
-        elif gpio.digital_read(26) == 0
+
+        import ULP
+        var gpio = ULP.get_mem(36) # low
+        if gpio & (1<<7) == 0
             self.on_button_prev()
+            return
+        end
+        gpio = ULP.get_mem(37) # high
+        if gpio & (1<<0) == 0
+            self.on_button_next()
+        elif gpio & (1<<1) == 0
+            self.on_button_action()
         end
     end
 
@@ -183,7 +194,7 @@ class ScreenManager
     def update_brightness_from_sensor()
         import ULP
         import math
-        var illuminance = ULP.get_mem(28)/100
+        var illuminance = ULP.get_mem(34)/100
         var brightness = int(10 * math.log(illuminance))
         if brightness < 10
             brightness = 10;
