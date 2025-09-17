@@ -1,18 +1,18 @@
-import MatrixController
+load("MatrixController")
 
-import BasicScreen
-import NetScreen
-import ImgScreen
-import StartScreen
-import CalendarScreen
-import WeatherScreen
-import AlertScreen
+load("BasicScreen")
+load("NetScreen")
+load("ImgScreen")
+load("StartScreen")
+load("CalendarScreen")
+load("WeatherScreen")
+load("AlertScreen")
 
 var Screens = [
     StartScreen, # only shown once
-    WeatherScreen,
     CalendarScreen,
     BasicScreen,
+    WeatherScreen,
     NetScreen,
     ImgScreen,
     AlertScreen, # only shown on event
@@ -38,7 +38,7 @@ class ScreenManager
         var matrix_height = 8
 
         self.matrixController = MatrixController(matrix_width, matrix_height, gpio.pin(gpio.WS2812, 0))
-        self.offscreenController = MatrixController(matrix_width, matrix_height,1) # 1 is a dummy pin, that MUST not be configured for WS2812
+        self.offscreenController = MatrixController(matrix_width, matrix_height, -1) # -1 is a dummy pin, that MUST not be configured for WS2812
 
         self.brightness = 40;
         self.color = fonts.palette[self.getColor()]

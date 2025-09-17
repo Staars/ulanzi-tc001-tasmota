@@ -12,7 +12,7 @@ class BasicScreen: BaseScreen
 
     def handleActionButton()
         self.showSecondsDots = !self.showSecondsDots
-        tasmota.cmd("buzzer")
+        #tasmota.cmd("buzzer")
     end
 
     def render(segue)
