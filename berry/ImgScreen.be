@@ -7,9 +7,7 @@ class ImgScreen: BaseScreen
 
     def init(screenManager)
         super(self).init(screenManager)
-
         self.screenManager.change_font('MatrixDisplay3x5')
-
         self.img = bytes()
         self.frames = util.animFromFile(self.img, "red_eye.bin", 8, 8, 3)
         self.img_idx = 0
@@ -31,9 +29,7 @@ class ImgScreen: BaseScreen
     def render(segue)
         var screen = segue ? self.offscreenController : self.matrixController
         screen.clear()
-
         self.showImg(screen)
-
         var rtc = tasmota.rtc()
         var time_str = tasmota.strftime('%H:%M', rtc['local'])
         var x_offset = 12

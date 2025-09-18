@@ -25,7 +25,7 @@ class MatrixController
             self.leds.set_bri(127)  # default brightness / emulator
         else
             # --- Offscreen/virtual mode ---
-            var bpp = 3  # RGB; change to 4 if RGBW target
+            var bpp = 3  # RGB
             self.matrix = Matrix(self.col_size, self.row_size, bpp, true)  # serpentine
             self.leds = nil
         end
@@ -35,9 +35,7 @@ class MatrixController
     end
 
     def clear()
-        if self.leds != nil
-            self.leds.clear()
-        end
+        self.matrix.clear(0)
     end
 
     def draw()

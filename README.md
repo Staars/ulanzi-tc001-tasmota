@@ -43,4 +43,47 @@ custom_berry_solidify   = https://raw.githubusercontent.com/Staars/ulanzi-tc001-
 ```
 
 
+### Easy upload
 
+- get IP of computer, like `ipconfig getifaddr en0`
+- run `python3 -m http.server 8000` in berry folder
+- start berry script on Ulanzi clock:
+
+```
+def l(name)
+var cl = webclient()
+cl.begin(f"http://<IP of computer>:8000/{name}")
+var r = cl.GET()
+print(r)
+cl.write_file(f"/{name}")
+cl.close()
+end
+
+# modify if needed
+files = [
+"AlertScreen.be",
+"autoexec.be",
+"BaseScreen.be",
+"BasicScreen.be",
+"BatteryScreen.be",
+"cal.bin",
+"CalendarScreen.be",
+"caution.bin",
+"fonts.be",
+"ImgScreen.be",
+"MatrixController.be",
+"NetScreen.be",
+"red_eye.bin",
+"ScreenManager.be",
+"StartScreen.be",
+"Tasmota.bin",
+"TsensScreen.be",
+"util.be",
+"weather.bin",
+"WeatherScreen.be"
+]
+
+for f:files
+ l(f)
+end
+```

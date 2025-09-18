@@ -17,7 +17,7 @@ class AlertScreen: BaseScreen
         self.text = " >> "
         self.duration = 20
 
-        self.img = bytes()
+        self.img = bytes(192)
         self.img_matrix = util.imgFromFile(self.img, "caution.bin", 8, 8, 3)
         self.can_render = true
     end

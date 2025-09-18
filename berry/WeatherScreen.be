@@ -6,7 +6,6 @@ class WeatherScreen: BaseScreen
 
     def init(screenManager)
         super(self).init(screenManager)
-        import json
         self.screenManager.change_font('MatrixDisplay3x5')
 
         self.img = bytes()
@@ -24,7 +23,7 @@ class WeatherScreen: BaseScreen
     end
 
     def showImg(screen)
-        screen.matrix.blit(self.frames[self.img_idx], 0, 0)
+        screen.matrix.blit(self.frames[self.img_idx], 0, 0, self.screenManager.brightness)
     end
 
     def render(segue)

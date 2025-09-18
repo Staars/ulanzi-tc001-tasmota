@@ -3,11 +3,9 @@ if tasmota.cmd("pixels")["Pixels"] != 256
 end
 import ScreenManager
 
-_screenManager = ScreenManager()
+_s = ScreenManager()
 
 # tasmota.set_timer(20000,def() import fonts _screenManager.color = fonts.palette[_screenManager.getColor()] end)
-
-tasmota.add_driver(_screenManager)
 
 def get_w()
     import json

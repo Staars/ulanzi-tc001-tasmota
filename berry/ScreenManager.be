@@ -7,11 +7,12 @@ import StartScreen
 import CalendarScreen
 import WeatherScreen
 import AlertScreen
-
+import BatteryScreen
 
 var Screens = [
     StartScreen, # only shown once
     CalendarScreen,
+    BatteryScreen,
     BasicScreen,
     WeatherScreen,
     NetScreen,
@@ -38,7 +39,7 @@ class ScreenManager
         var matrix_width = 32
         var matrix_height = 8
 
-        self.matrixController = MatrixController(matrix_width, matrix_height, gpio.pin(gpio.WS2812, 0))
+        self.matrixController = MatrixController(matrix_width, matrix_height, gpio.pin(gpio.WS2812, 2))
         self.offscreenController = MatrixController(matrix_width, matrix_height, -1) # -1 is a dummy pin, that MUST not be configured for WS2812
 
         self.brightness = 40;
@@ -54,8 +55,18 @@ class ScreenManager
         self.loop_50ms = /->self.currentScreen.loop()
         self.changeCounter = 0
         self.segueCtr = 0
-
         mqtt.subscribe("ulanzi_alert")
+        tasmota.add_driver(self)
+    end
+
+    def deinit()
+        import mqtt
+        tasmota.remove_driver(self)
+        mqtt.unsubscribe("ulanzi_alert")
+        for i:global.Screens
+            i = nil
+        end
+        global.Screens = nil
     end
 
     def initULP()

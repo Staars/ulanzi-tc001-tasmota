@@ -13,13 +13,8 @@ class CalendarScreen: BaseScreen
     end
 
     def showImg(screen)
-        screen.matrix.blit(self.img_matrix, 0, 0)
-        var y = 0
-        while y < 8
-            var pixel = screen.matrix.get(7, y)
-            screen.matrix.set(8, y, pixel, self.screenManager.brightness)
-            y += 1
-        end
+        screen.matrix.blit(self.img_matrix, 0, 0, self.screenManager.brightness)
+        screen.matrix.blit(self.img_matrix, 1, 0, self.screenManager.brightness) # make it wider 1 pixel
     end
 
     def drawBars(screen)
