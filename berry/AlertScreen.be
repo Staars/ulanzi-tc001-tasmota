@@ -24,8 +24,8 @@ class AlertScreen: BaseScreen
 
     def loop()
         if self.can_render == true return end
-        self.offscreenController.matrix.scroll(1, self.screenManager.outShiftBuffer)
-        self.matrixController.matrix.scroll(1, self.screenManager.trashBuffer, self.screenManager.outShiftBuffer)
+        self.offscreenController.matrix.scroll(1)
+        self.matrixController.matrix.scroll(1, self.offscreenController.matrix)
         self.matrixController.leds.show()
         self.scrollsLeft -= 1
         if self.scrollsLeft > 0 return end
@@ -33,8 +33,8 @@ class AlertScreen: BaseScreen
     end
 
     def showImg(screen)
-        screen.matrix.blit(self.img_matrix, 0, 0)
-        screen.matrix.blit(self.img_matrix, 12, 0)
+        screen.matrix.blit(self.img_matrix, 0, 0, self.screenManager.brightness)
+        screen.matrix.blit(self.img_matrix, 12, 0, self.screenManager.brightness)
     end
 
     def nextChar()

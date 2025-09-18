@@ -25,7 +25,7 @@ class ImgScreen: BaseScreen
     end
 
     def showImg(screen)
-        screen.matrix.blit(self.frames[self.img_idx], 0, 0)
+        screen.matrix.blit(self.frames[self.img_idx], 0, 0, self.screenManager.brightness)
     end
 
     def render(segue)

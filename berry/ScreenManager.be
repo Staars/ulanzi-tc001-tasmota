@@ -1,12 +1,13 @@
-load("MatrixController")
+import MatrixController
 
-load("BasicScreen")
-load("NetScreen")
-load("ImgScreen")
-load("StartScreen")
-load("CalendarScreen")
-load("WeatherScreen")
-load("AlertScreen")
+import BasicScreen
+import NetScreen
+import ImgScreen
+import StartScreen
+import CalendarScreen
+import WeatherScreen
+import AlertScreen
+
 
 var Screens = [
     StartScreen, # only shown once
@@ -24,7 +25,7 @@ class ScreenManager
     var color
     var currentScreen
     var currentScreenIdx
-    var nextScreen, segueCtr, loop_50ms, outShiftBuffer, trashBuffer
+    var nextScreen, segueCtr, loop_50ms
     var changeCounter
 
 
@@ -51,8 +52,6 @@ class ScreenManager
         self.currentScreenIdx = 0
         self.currentScreen = Screens[self.currentScreenIdx](self)
         self.loop_50ms = /->self.currentScreen.loop()
-        self.outShiftBuffer = bytes(-(matrix_width * 3)) # or height, if height > width
-        self.trashBuffer = bytes(-(matrix_width * 3))
         self.changeCounter = 0
         self.segueCtr = 0
 
@@ -129,8 +128,8 @@ class ScreenManager
     end
 
     def doSegue(direction)
-        self.offscreenController.matrix.scroll(direction, self.outShiftBuffer)
-        self.matrixController.matrix.scroll(direction, self.trashBuffer, self.outShiftBuffer)
+        self.offscreenController.matrix.scroll(direction)
+        self.matrixController.matrix.scroll(direction, self.offscreenController.matrix)
         self.matrixController.draw()
 
         self.segueCtr -= 1

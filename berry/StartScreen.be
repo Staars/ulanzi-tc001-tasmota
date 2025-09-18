@@ -15,7 +15,7 @@ class StartScreen: BaseScreen
     end
 
     def showImg(screen)
-        screen.matrix.blit(self.img_matrix, 0, 0) # TODO: use self.screenManager.brightness later
+        screen.matrix.blit(self.img_matrix, 0, 0, self.screenManager.brightness) # TODO: use self.screenManager.brightness later
     end
 
     def render(segue)

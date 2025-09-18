@@ -35,7 +35,9 @@ class MatrixController
     end
 
     def clear()
-        self.matrix.fill(0x000000)
+        if self.leds != nil
+            self.leds.clear()
+        end
     end
 
     def draw()
