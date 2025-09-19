@@ -165,4 +165,4 @@ class FIRE2012_DEMO_BYTES
     end
 end
 
-var fire = FIRE2012_DEMO_BYTES()
+var anim = FIRE2012_DEMO_BYTES()

@@ -36,29 +36,6 @@ class DNA
         self.draw_dna()
     end
 
-    def hsv_to_rgb(h, s, v)
-        var r, g, b
-        var i = (h / 43) % 6
-        var f = (h % 43) * 6
-        var p = (v * (255 - s)) / 255
-        var q = (v * (255 - ((s * f) / 255))) / 255
-        var t = (v * (255 - ((s * (255 - f)) / 255))) / 255
-        if i == 0
-            r = v; g = t; b = p
-        elif i == 1
-            r = q; g = v; b = p
-        elif i == 2
-            r = p; g = v; b = t
-        elif i == 3
-            r = p; g = q; b = v
-        elif i == 4
-            r = t; g = p; b = v
-        else
-            r = v; g = p; b = q
-        end
-        return (r << 16) | (g << 8) | b
-    end
-
     def draw_dna()
         import math
         var w = self.W
@@ -83,12 +60,10 @@ class DNA
             var y2 = int((math.sin(angle + math.pi) * (h / 2 - 1)) + (h / 2))
 
             # First strand: hue shifts with x
-            var col1 = self.hsv_to_rgb((x * 8) % 256, 255, 255)
-            self.matrix.set(x, y1, col1)
+            self.matrix.set(x, y1, (x * 8) % 256, 255, 255)
 
             # Second strand: hue offset by 128
-            var col2 = self.hsv_to_rgb(((x * 8) + 128) % 256, 255, 255)
-            self.matrix.set(x, y2, col2)
+            self.matrix.set(x, y2, ((x * 8) + 128) % 256, 255, 255)
 
             x += 1
         end
@@ -101,4 +76,4 @@ class DNA
 end
 
 # Start the DNA effect
-var dna = DNA()
+var anim = DNA()

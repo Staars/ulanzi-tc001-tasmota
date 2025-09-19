@@ -36,29 +36,6 @@ class RAINBOW_CYCLE
         self.draw_rainbow()
     end
 
-    def hsv_to_rgb(h, s, v)
-        var r, g, b
-        var i = (h / 43) % 6
-        var f = (h % 43) * 6
-        var p = (v * (255 - s)) / 255
-        var q = (v * (255 - ((s * f) / 255))) / 255
-        var t = (v * (255 - ((s * (255 - f)) / 255))) / 255
-        if i == 0
-            r = v; g = t; b = p
-        elif i == 1
-            r = q; g = v; b = p
-        elif i == 2
-            r = p; g = v; b = t
-        elif i == 3
-            r = p; g = q; b = v
-        elif i == 4
-            r = t; g = p; b = v
-        else
-            r = v; g = p; b = q
-        end
-        return (r << 16) | (g << 8) | b
-    end
-
     def draw_rainbow()
         var w = self.W
         var h = self.H
@@ -69,8 +46,7 @@ class RAINBOW_CYCLE
             var x = 0
             while x < w
                 var hue_val = (hue_base + (x * 256 / w)) % 256
-                var col = self.hsv_to_rgb(hue_val, 255, 255)
-                self.matrix.set(x, y, col)
+                self.matrix.set(x, y, hue_val, 255, 255)
                 x += 1
             end
             y += 1
@@ -83,4 +59,4 @@ class RAINBOW_CYCLE
     end
 end
 
-var rainbow = RAINBOW_CYCLE()
+var anim = RAINBOW_CYCLE()

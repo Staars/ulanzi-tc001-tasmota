@@ -68,29 +68,6 @@ class PLASMA_NOISE
         self.draw_plasma()
     end
 
-    def hsv_to_rgb(h, s, v)
-        var r, g, b
-        var i = (h / 43) % 6
-        var f = (h % 43) * 6
-        var p = (v * (255 - s)) / 255
-        var q = (v * (255 - ((s * f) / 255))) / 255
-        var t = (v * (255 - ((s * (255 - f)) / 255))) / 255
-        if i == 0
-            r = v; g = t; b = p
-        elif i == 1
-            r = q; g = v; b = p
-        elif i == 2
-            r = p; g = v; b = t
-        elif i == 3
-            r = p; g = q; b = v
-        elif i == 4
-            r = t; g = p; b = v
-        else
-            r = v; g = p; b = q
-        end
-        return (int(r) << 16) | (int(g) << 8) | int(b)
-    end
-
     def draw_plasma()
         var w = self.W
         var h = self.H
@@ -108,7 +85,7 @@ class PLASMA_NOISE
                 var hue = (int(nval) + self.tick * 2) % 256
                 var bright = 128 + ((int(nval) - 128) / 2)
 
-                self.matrix.set(x, y, self.hsv_to_rgb(hue, 255, bright))
+                self.matrix.set(x, y, hue, 255, bright)
                 x += 1
             end
             y += 1

@@ -1,8 +1,4 @@
 
-#########################
-
-import math
-
 #@ solidify:KALEIDOSCOPE_SPIN
 class KALEIDOSCOPE_SPIN
     var strip, matrix
@@ -14,7 +10,7 @@ class KALEIDOSCOPE_SPIN
     var spin_speed
 
     def init()
-        self.strip = Leds(32 * 8, gpio.pin(gpio.WS2812, 32))
+        self.strip = Leds(32 * 8, gpio.pin(gpio.WS2812, 2))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
         self.matrix = Matrix(buf, 32, 8, bpp, true)
@@ -45,50 +41,8 @@ class KALEIDOSCOPE_SPIN
         self.draw()
     end
 
-    def hsvInt(h, v)
-        var s = 255
-        var sector = h / 60
-        var f = h % 60
-        var p = (v * (255 - s)) / 255
-        var sf = (s * f) / 60
-        var q = (v * (255 - sf)) / 255
-        var s60f = (s * (60 - f)) / 60
-        var t = (v * (255 - s60f)) / 255
-
-        var r = 0
-        var g = 0
-        var b = 0
-
-        if sector == 0
-            r = v
-            g = t
-            b = p
-        elif sector == 1
-            r = q
-            g = v
-            b = p
-        elif sector == 2
-            r = p
-            g = v
-            b = t
-        elif sector == 3
-            r = p
-            g = q
-            b = v
-        elif sector == 4
-            r = t
-            g = p
-            b = v
-        else
-            r = v
-            g = p
-            b = q
-        end
-
-        return (r << 16) | (g << 8) | b
-    end
-
     def draw()
+        import math
         var angle_offset = self.tick * self.spin_speed
         for y:0..7
             for x:0..31
@@ -117,8 +71,7 @@ class KALEIDOSCOPE_SPIN
                 if val < 0 val = 0 end
                 if val > 255 val = 255 end
 
-                var col = self.hsvInt(hue, val)
-                self.matrix.set(x, y, col)
+                self.matrix.set(x, y, hue, 255, val)
             end
         end
         self.strip.show()
@@ -126,4 +79,3 @@ class KALEIDOSCOPE_SPIN
 end
 
 var anim = KALEIDOSCOPE_SPIN()
-

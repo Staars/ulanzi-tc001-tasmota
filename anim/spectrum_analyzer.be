@@ -141,49 +141,6 @@ class SPECTRUM_ANALYZER_RANDOM
         end
     end
 
-    def hsvInt(h, v)
-        var s = 255
-        var sector = h / 60
-        var f = h % 60
-        var p = (v * (255 - s)) / 255
-        var sf = (s * f) / 60
-        var q = (v * (255 - sf)) / 255
-        var s60f = (s * (60 - f)) / 60
-        var t = (v * (255 - s60f)) / 255
-
-        var r = 0
-        var g = 0
-        var b = 0
-
-        if sector == 0
-            r = v
-            g = t
-            b = p
-        elif sector == 1
-            r = q
-            g = v
-            b = p
-        elif sector == 2
-            r = p
-            g = v
-            b = t
-        elif sector == 3
-            r = p
-            g = q
-            b = v
-        elif sector == 4
-            r = t
-            g = p
-            b = v
-        else
-            r = v
-            g = p
-            b = q
-        end
-
-        return (r << 16) | (g << 8) | b
-    end
-
     def barColor(y, h)
         var ratio = 0.0
         if h > 0.0
@@ -193,7 +150,7 @@ class SPECTRUM_ANALYZER_RANDOM
         var v = 180 + int(75 * (1.0 - ratio))
         if v > 255 v = 255 end
         if v < 0 v = 0 end
-        return self.hsvInt(hue, v)
+        return [hue, v]
     end
 
     def draw()
@@ -209,7 +166,7 @@ class SPECTRUM_ANALYZER_RANDOM
                 if y < int(h + 0.5)
                     var col = self.barColor(y, h)
                     for x:x0..x1
-                        self.matrix.set(x, y_pix, col)
+                        self.matrix.set(x, y_pix, col[0],255,col[1])
                     end
                 end
             end

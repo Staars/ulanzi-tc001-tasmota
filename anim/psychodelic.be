@@ -76,49 +76,6 @@ class PSYCHEDELIC_SCROLL_LAYERED
         self.draw()
     end
 
-    def hsvInt(h, v)
-        var s = 255
-        var sector = h / 60
-        var f = h % 60
-        var p = (v * (255 - s)) / 255
-        var sf = (s * f) / 60
-        var q = (v * (255 - sf)) / 255
-        var s60f = (s * (60 - f)) / 60
-        var t = (v * (255 - s60f)) / 255
-
-        var r = 0
-        var g = 0
-        var b = 0
-
-        if sector == 0
-            r = v
-            g = t
-            b = p
-        elif sector == 1
-            r = q
-            g = v
-            b = p
-        elif sector == 2
-            r = p
-            g = v
-            b = t
-        elif sector == 3
-            r = p
-            g = q
-            b = v
-        elif sector == 4
-            r = t
-            g = p
-            b = v
-        else
-            r = v
-            g = p
-            b = q
-        end
-
-        return (r << 16) | (g << 8) | b
-    end
-
     def draw()
         var t = self.tick
         var zoom_x = 1.0 + 0.25 * math.sin(self.zoom_phase_x)
@@ -143,8 +100,7 @@ class PSYCHEDELIC_SCROLL_LAYERED
 
                 # Blend hues by averaging
                 var hue = int(((hue1 + hue2) / 2.0) % 360)
-                var col = self.hsvInt(hue, 255)
-                self.matrix.set(x, y, col)
+                self.matrix.set(x, y, hue,255,255)
             end
         end
         self.strip.show()

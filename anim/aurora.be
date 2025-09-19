@@ -37,29 +37,6 @@ class AURORA
         self.draw_aurora()
     end
 
-    def hsv_to_rgb(h, s, v)
-        var r, g, b
-        var i = (h / 43) % 6
-        var f = (h % 43) * 6
-        var p = (v * (255 - s)) / 255
-        var q = (v * (255 - ((s * f) / 255))) / 255
-        var t = (v * (255 - ((s * (255 - f)) / 255))) / 255
-        if i == 0
-            r = v; g = t; b = p
-        elif i == 1
-            r = q; g = v; b = p
-        elif i == 2
-            r = p; g = v; b = t
-        elif i == 3
-            r = p; g = q; b = v
-        elif i == 4
-            r = t; g = p; b = v
-        else
-            r = v; g = p; b = q
-        end
-        return (r << 16) | (g << 8) | b
-    end
-
     def draw_aurora()
         import math
         var w = self.W
@@ -77,8 +54,7 @@ class AURORA
 
                 # Hue shifts across X and Y
                 var hue_val = (hue_base + x * 4 + y * 8) % 256
-                var col = self.hsv_to_rgb(hue_val, 200, brightness)
-                self.matrix.set(x, y, col)
+                self.matrix.set(x, y, hue_val, 200, brightness)
                 x += 1
             end
             y += 1
@@ -92,4 +68,4 @@ class AURORA
     end
 end
 
-var aurora = AURORA()
+var anim = AURORA()
