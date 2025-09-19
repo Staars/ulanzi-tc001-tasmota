@@ -1,5 +1,3 @@
-#@solidify:fonts
-var fonts = module("fonts")
 
 var Mono5x8 = {
   'width': 5,
@@ -38,6 +36,8 @@ def glyph_bytes(font, idx)
     return font.data[off .. off + len - 1]
 end
 
+#@solidify:fonts
+var fonts = module("fonts")
 fonts.font_width = font_width
 fonts.glyph_bytes = glyph_bytes
 
