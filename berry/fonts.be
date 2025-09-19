@@ -24,22 +24,4 @@ fonts.font_map = {
     'Tiny3x5': fonts.Tiny3x5
 }
 
-# Helper: unpack nibble-packed widths
-def font_width(font, idx)
-    var b = font.widths[idx >> 1]
-    return (idx & 1) == 0 ? ((b >> 4) & 0x0F) : (b & 0x0F)
-end
-
-# Helper: wrap a glyph's bit-lines directly as a 1‑bpp Matrix
-class Matrix end
-def glyph_matrix(font, idx)
-    var bytes_per_line = (font.width + 7) >> 3
-    var off = idx * bytes_per_line * font.height
-    var len = bytes_per_line * font.height
-    return Matrix(font.data[off .. off + len - 1], bytes_per_line)
-end
-
-fonts.font_width = font_width
-fonts.glyph_matrix = glyph_matrix
-
 return fonts
