@@ -100,19 +100,22 @@ if __name__ == "__main__":
     print(",\n".join(font_map_entries))
     print("}\n")
 
-    # Append helper functions
+    # Append helper functions in top-level form
     print("# Helper: unpack nibble-packed widths")
-    print("def fonts.font_width(font, idx)")
+    print("def font_width(font, idx)")
     print("    var b = font.widths[idx >> 1]")
     print("    return (idx & 1) == 0 ? ((b >> 4) & 0x0F) : (b & 0x0F)")
     print("end\n")
 
-    print("# Helper: wrap a glyph's bit-lines directly as a 1‑bpp Matrix")
-    print("def fonts.glyph_matrix(font, idx)")
+    print("# Helper: return glyph bytes (caller wraps in Matrix)")
+    print("def glyph_bytes(font, idx)")
     print("    var bytes_per_line = (font.width + 7) >> 3")
     print("    var off = idx * bytes_per_line * font.height")
-    print("    return Matrix(font.data.slice(off, off + bytes_per_line * font.height),")
-    print("                  bytes_per_line)")
+    print("    var len = bytes_per_line * font.height")
+    print("    return font.data[off .. off + len - 1]")
     print("end\n")
+
+    print("fonts.font_width = font_width")
+    print("fonts.glyph_bytes = glyph_bytes\n")
 
     print("return fonts")

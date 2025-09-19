@@ -56,19 +56,15 @@ class MatrixController
     end
 
     # --- print_char using fonts.glyph_matrix() ---
-    def print_char(char, x, y, collapse, tint, brightness)
-        import fonts
-        var idx = ord(char) - self.font.first_char
-        if idx < 0 || idx >= self.font.count
-            return 1  # unknown char fallback
-        end
+    def print_char(ch, x, y, collapse, tint, brightness)
+        var idx = ord(ch) - self.font.first_char
+        if idx < 0 || idx >= self.font.count return 1 end
 
         var eff_w = fonts.font_width(self.font, idx)
-        var glyph = fonts.glyph_matrix(self.font, idx)
+        var glyph = Matrix(fonts.glyph_bytes(self.font, idx),
+                        (self.font.width + 7) >> 3)
 
-        # Blit mono→color with brightness and tint
         self.matrix.blit(glyph, x, y, brightness, tint)
-
         return collapse ? eff_w : self.font.width
     end
 

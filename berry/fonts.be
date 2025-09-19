@@ -1,4 +1,3 @@
-class Matrix end
 #@solidify:fonts
 var fonts = module("fonts")
 
@@ -25,28 +24,21 @@ fonts.font_map = {
     'Tiny3x5': Tiny3x5
 }
 
-class font
-    var with
-    var height
-    var widths
-    var data
-end
-
 # Helper: unpack nibble-packed widths
 def font_width(font, idx)
     var b = font.widths[idx >> 1]
     return (idx & 1) == 0 ? ((b >> 4) & 0x0F) : (b & 0x0F)
 end
 
-# Helper: wrap a glyph's bit-lines directly as a 1‑bpp Matrix
-def glyph_matrix(font, idx)
+# Helper: return glyph bytes (caller wraps in Matrix)
+def glyph_bytes(font, idx)
     var bytes_per_line = (font.width + 7) >> 3
     var off = idx * bytes_per_line * font.height
     var len = bytes_per_line * font.height
-    return Matrix(font.data[off .. off + len - 1], bytes_per_line)
+    return font.data[off .. off + len - 1]
 end
 
 fonts.font_width = font_width
-fonts.glyph_matrix = glyph_matrix
+fonts.glyph_bytes = glyph_bytes
 
 return fonts
