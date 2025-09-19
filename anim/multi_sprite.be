@@ -1,15 +1,12 @@
-
-#########################################
-
-#@ solidify:MULTI_SPRITE_DEMO
-class MULTI_SPRITE_DEMO
+#@ solidify:MULTI_SPRITE_TINT_DEMO
+class MULTI_SPRITE_TINT_DEMO
     var strip, matrix
     var fast_loop_closure
     var tick, frame_div
 
-    # Sprite definitions: width, height, pixel data (0 = transparent)
+    # Sprite definitions: width, height, mono Matrix
     var sprites
-    var actors   # list of [sprite_index, x, y, vx, vy]
+    var actors   # [sprite_index, x, y, vx, vy, tint:int, bri:int]
 
     def init()
         self.strip = Leds(32 * 8, gpio.pin(gpio.WS2812, 32))
@@ -17,48 +14,64 @@ class MULTI_SPRITE_DEMO
         var buf = self.strip.pixels_buffer()
         self.matrix = Matrix(buf, 32, 8, bpp, true)
 
-        # Define sprites
-        var smiley = [
-            0,        0xFFFF00, 0xFFFF00, 0xFFFF00, 0,
-            0xFFFF00, 0,        0x000000, 0,        0xFFFF00,
-            0xFFFF00, 0,        0x000000, 0,        0xFFFF00,
-            0xFFFF00, 0,        0,        0,        0xFFFF00,
-            0,        0xFFFF00, 0xFFFF00, 0xFFFF00, 0
+        # Monochrome sprite data with shading (0=transparent, 255=full bright)
+        # Smiley: outer ring dimmer, eyes darker, mouth shaded
+        var smiley_mono = [
+            0,   180, 200, 180,   0,
+          180,    50,   0,   50, 180,
+          200,     0,   0,    0, 200,
+          180,    50,   0,   50, 180,
+            0,   180, 200, 180,   0
         ]
-        var heart = [
-            0xFF0000, 0xFF0000, 0,        0xFF0000, 0xFF0000,
-            0xFF0000, 0xFF0000, 0xFF0000, 0xFF0000, 0xFF0000,
-            0xFF0000, 0xFF0000, 0xFF0000, 0xFF0000, 0xFF0000,
-            0,        0xFF0000, 0xFF0000, 0xFF0000, 0,
-            0,        0,        0xFF0000, 0,        0
+        # Heart: edges dimmer, center bright
+        var heart_mono = [
+          200, 200,   0, 200, 200,
+          220, 240, 240, 240, 220,
+          240, 255, 255, 255, 240,
+            0, 220, 240, 220,   0,
+            0,   0, 200,   0,   0
         ]
-        var star = [
-            0,        0,        0xFFFFFF, 0,        0,
-            0,        0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0,
-            0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF,
-            0,        0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0,
-            0,        0,        0xFFFFFF, 0,        0
+        # Star: center bright, arms dimmer
+        var star_mono = [
+            0,   0, 180,   0,   0,
+            0, 180, 220, 180,   0,
+          180, 220, 255, 220, 180,
+            0, 180, 220, 180,   0,
+            0,   0, 180,   0,   0
         ]
 
+        # Wrap mono data in 1bpp Matrix objects
         self.sprites = [
-            [5, 5, smiley],
-            [5, 5, heart],
-            [5, 5, star]
+            [5, 5, Matrix(bytes(-(5*5)), 5, 5, 1, false)],
+            [5, 5, Matrix(bytes(-(5*5)), 5, 5, 1, false)],
+            [5, 5, Matrix(bytes(-(5*5)), 5, 5, 1, false)]
         ]
+        # Fill the buffers
+        self.fillMono(self.sprites[0][2], smiley_mono)
+        self.fillMono(self.sprites[1][2], heart_mono)
+        self.fillMono(self.sprites[2][2], star_mono)
 
-        # Actors: [sprite_index, x, y, vx, vy]
+        # Actors: [sprite_index, x, y, vx, vy, tint:int, bri:int]
         self.actors = [
-            [0, 0, 0, 1, 1],
-            [1, 10, 2, -1, 1],
-            [2, 20, 5, 1, -1]
+            [0, 0, 0, 1, 1,   0xFFFF00, 255],  # yellow smiley
+            [1, 10, 2, -1, 1, 0xFF00FF, 200],  # magenta heart
+            [2, 20, 5, 1, -1, 0x00FFFF, 255]   # cyan star
         ]
 
         self.tick = 0
-        self.frame_div = 10  # update every 2 fast_loop ticks
+        self.frame_div = 20
 
-        # Register fast loop
         self.fast_loop_closure = def () self.fast_loop() end
         tasmota.add_fast_loop(self.fast_loop_closure)
+    end
+
+    def fillMono(m, arr)
+        var buf = m._buf  # underlying bytes
+        var i = 0
+        while i < size(arr)
+            buf[i] = arr[i]
+            i += 1
+        end
     end
 
     def deinit()
@@ -78,51 +91,42 @@ class MULTI_SPRITE_DEMO
 
     def update()
         for a: self.actors
-            a[1] += a[3]  # x += vx
-            a[2] += a[4]  # y += vy
-
+            a[1] += a[3]
+            a[2] += a[4]
             var sprite_w = self.sprites[a[0]][0]
             var sprite_h = self.sprites[a[0]][1]
 
-            # Bounce horizontally
             if a[1] <= 0 || a[1] + sprite_w >= 32
                 a[3] = -a[3]
                 a[1] += a[3]
             end
-            # Bounce vertically
             if a[2] <= 0 || a[2] + sprite_h >= 8
                 a[4] = -a[4]
                 a[2] += a[4]
             end
+
+            # Cycle tint every 50 ticks
+            if self.tick % 50 == 0
+                a[5] = self.nextTint(a[5])
+            end
         end
+    end
+
+    def nextTint(col)
+        if col == 0xFFFF00 return 0xFF00FF end
+        if col == 0xFF00FF return 0x00FFFF end
+        if col == 0x00FFFF return 0xFFFFFF end
+        return 0xFFFF00
     end
 
     def draw()
         self.matrix.clear(0x000000)
         for a: self.actors
-            self.blitSprite(a[0], a[1], a[2])
+            var mono = self.sprites[a[0]][2]
+            self.matrix.blit(mono, a[1], a[2], a[6], a[5])  # bri, tint
         end
         self.strip.show()
     end
-
-    def blitSprite(index, x, y)
-        var sprite_w = self.sprites[index][0]
-        var sprite_h = self.sprites[index][1]
-        var data = self.sprites[index][2]
-
-        for sy:0..sprite_h-1
-            for sx:0..sprite_w-1
-                var col = data[sy * sprite_w + sx]
-                if col != 0
-                    var px = x + sx
-                    var py = y + sy
-                    if px >= 0 && px < 32 && py >= 0 && py < 8
-                        self.matrix.set(px, py, col)
-                    end
-                end
-            end
-        end
-    end
 end
 
-var anim = MULTI_SPRITE_DEMO()
+var anim = MULTI_SPRITE_TINT_DEMO()
