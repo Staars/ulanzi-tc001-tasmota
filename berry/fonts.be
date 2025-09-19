@@ -39,7 +39,7 @@ def font_width(font, idx)
 end
 
 # Helper: wrap a glyph's bit-lines directly as a 1‑bpp Matrix
-def fonts.glyph_matrix(font, idx)
+def glyph_matrix(font, idx)
     var bytes_per_line = (font.width + 7) >> 3
     var off = idx * bytes_per_line * font.height
     var len = bytes_per_line * font.height
