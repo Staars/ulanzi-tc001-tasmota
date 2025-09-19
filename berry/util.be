@@ -1,3 +1,4 @@
+class Matrix end
 def splitStringToChunks(value, chunkSize)
     var output = []
     var tmp = ""
