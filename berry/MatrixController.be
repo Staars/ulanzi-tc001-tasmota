@@ -46,60 +46,36 @@ class MatrixController
 
     def change_font(font_key)
         import fonts
-        self.font = fonts.font_map[font_key]['font']
-        self.font_width = fonts.font_map[font_key]['width']
+        var f = fonts.font_map[font_key]
+        self.font = f['font']       # packed font object
+        self.font_width = f['width']
     end
 
     def set_matrix_pixel_color(x, y, color, brightness)
         self.matrix.set(x, y, color, brightness)
     end
 
-    def print_binary(value, column, color, brightness)
-        for i: 0..7
-            if value & (1 << i) != 0
-                self.matrix.set(column, i, color, brightness)
-            end
+    # --- print_char using fonts.glyph_matrix() ---
+    def print_char(char, x, y, collapse, tint, brightness)
+        import fonts
+        var idx = ord(char) - self.font.first_char
+        if idx < 0 || idx >= self.font.count
+            return 1  # unknown char fallback
         end
-    end
 
-    def print_char(char, x, y, collapse, color, brightness)
-        var actual_width = collapse ? -1 : self.font_width
-        if char == " "
-            return self.font_width - 2
-        end
-        if self.font.contains(char) == false
-            print("Font does not contain char: ", char)
-            return 0
-        end
-        var char_bitmap = bytes().fromb64(self.font[char])
-        var font_height = size(char_bitmap)
-        var y_offset = 7 - font_height
-        for i: 0..(font_height-1)
-            var code = char_bitmap[i]
-            for j: 0..self.font_width
-                if code & (1 << (7 - j)) != 0
-                    self.matrix.set(x+j, y+i+y_offset, color, brightness)
-                    if j > actual_width
-                        actual_width = j
-                    end
-                end
-            end
-        end
-        return collapse ? actual_width + 1 : actual_width
+        var eff_w = fonts.font_width(self.font, idx)
+        var glyph = fonts.glyph_matrix(self.font, idx)
+
+        # Blit mono→color with brightness and tint
+        self.matrix.blit(glyph, x, y, brightness, tint)
+
+        return collapse ? eff_w : self.font.width
     end
 
     def print_string(string, x, y, collapse, color, brightness)
-        var char_offset = 0
-        for i: 0..(size(string)-1)
-            var actual_width = 0
-            if x + char_offset > 1 - self.font_width
-                actual_width = self.print_char(string[i], x + char_offset, y, collapse, color, brightness)
-            end
-            if actual_width == 0
-                actual_width = 1
-            end
-            char_offset += actual_width + 1
-            self.print_binary(0, x + char_offset, y, color, brightness)
+        var cursor = 0
+        for ch in string
+            cursor += self.print_char(ch, x + cursor, y, collapse, color, brightness) + 1
         end
     end
 end
