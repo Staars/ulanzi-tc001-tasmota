@@ -54,14 +54,6 @@ class MatrixController
         self.matrix.set(x, y, color, brightness)
     end
 
-    def print_binary(value, column, color, brightness)
-        for i: 0..7
-            if value & (1 << i) != 0
-                self.matrix.set(column, i, color, brightness)
-            end
-        end
-    end
-
     def print_char(char, x, y, collapse, color, brightness)
         var actual_width = collapse ? -1 : self.font_width
         if char == " "
@@ -74,12 +66,12 @@ class MatrixController
         var char_bitmap = bytes().fromb64(self.font[char])
         var font_height = size(char_bitmap)
         var y_offset = 7 - font_height
-        for i: 0..(font_height-1)
-            var code = char_bitmap[i]
-            for j: 0..self.font_width
-                if code & (1 << (7 - j)) != 0
-                    self.matrix.set(x+j, y+i+y_offset, color, brightness)
-                    if j > actual_width
+        self.matrix.blit(Matrix(char_bitmap,1), x, y + y_offset, brightness, color)
+        if collapse
+            for i: 0..(font_height-1)
+                var code = char_bitmap[i]
+                for j: 0..self.font_width
+                    if code & (1 << (7 - j)) != 0 && j > actual_width
                         actual_width = j
                     end
                 end
@@ -99,7 +91,6 @@ class MatrixController
                 actual_width = 1
             end
             char_offset += actual_width + 1
-            self.print_binary(0, x + char_offset, y, color, brightness)
         end
     end
 end
