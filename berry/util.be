@@ -14,6 +14,8 @@ def splitStringToChunks(value, chunkSize)
     return output
 end
 
+class Matrix end
+
 def imgFromFile(buf, filename, width, height, bpp)
     var f = open(filename, "r")
     buf .. f.readbytes()

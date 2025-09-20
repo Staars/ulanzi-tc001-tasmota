@@ -55,7 +55,6 @@ class MatrixController
     end
 
     def print_char(char, x, y, collapse, color, brightness)
-        var actual_width = collapse ? -1 : self.font_width
         if char == " "
             return self.font_width - 2
         end
@@ -63,34 +62,21 @@ class MatrixController
             print("Font does not contain char: ", char)
             return 0
         end
-        var char_bitmap = bytes().fromb64(self.font[char])
-        var font_height = size(char_bitmap)
-        var y_offset = 7 - font_height
-        self.matrix.blit(Matrix(char_bitmap,1), x, y + y_offset, brightness, color)
-        if collapse
-            for i: 0..(font_height-1)
-                var code = char_bitmap[i]
-                for j: 0..self.font_width
-                    if code & (1 << (7 - j)) != 0 && j > actual_width
-                        actual_width = j
-                    end
-                end
-            end
-        end
-        return collapse ? actual_width + 1 : actual_width
+
+        var glyph = self.font[char]
+        var char_bitmap = bytes().fromb64(glyph['b'])
+        self.matrix.blit(Matrix(char_bitmap, 1), x, y + glyph['y'], brightness, color)
+
+        return collapse ? glyph['w'] + 1 : self.font_width
     end
 
     def print_string(string, x, y, collapse, color, brightness)
         var char_offset = 0
         for i: 0..(size(string)-1)
-            var actual_width = 0
             if x + char_offset > 1 - self.font_width
-                actual_width = self.print_char(string[i], x + char_offset, y, collapse, color, brightness)
+                var actual_width = self.print_char(string[i], x + char_offset, y, collapse, color, brightness)
+                char_offset += actual_width + 1
             end
-            if actual_width == 0
-                actual_width = 1
-            end
-            char_offset += actual_width + 1
         end
     end
 end
