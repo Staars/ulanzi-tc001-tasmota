@@ -17,6 +17,8 @@ def font_width(font, idx)
     return (idx & 1) == 0 ? ((b >> 4) & 0x0F) : (b & 0x0F)
 end
 
+class Matrix end
+
 def glyph_matrix(font, idx)
     var bytes_per_line = (font.width + 7) >> 3
     var off = idx * bytes_per_line * font.height
