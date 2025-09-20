@@ -55,18 +55,28 @@ class MatrixController
         self.matrix.set(x, y, color, brightness)
     end
 
-    # --- print_char using fonts.glyph_matrix() ---
+    # --- print_char using fonts.get_font_slice() + glyph_matrix() ---
     def print_char(ch, x, y, collapse, tint, brightness)
-        var idx = ord(ch) - self.font.first_char
-        if idx < 0 || idx >= self.font.count return 1 end
+        # pick the correct 32‑char slice for this character
+        var slice = fonts.get_font_slice(fonts, self.font_base, ch)
 
-        var eff_w = fonts.font_width(self.font, idx)
-        var glyph = Matrix(fonts.glyph_bytes(self.font, idx),
-                        (self.font.width + 7) >> 3)
+        # index within this slice
+        var idx = ord(ch) - slice.first_char
+        if idx < 0 || idx >= slice.count return 1 end
 
+        # effective width from packed widths
+        var eff_w = fonts.font_width(slice, idx)
+
+        # build a Matrix for this glyph
+        var glyph = fonts.glyph_matrix(slice, idx)
+
+        # blit to the target matrix
         self.matrix.blit(glyph, x, y, brightness, tint)
-        return collapse ? eff_w : self.font.width
+
+        # return collapsed or full width
+        return collapse ? eff_w : slice.width
     end
+
 
     def print_string(string, x, y, collapse, color, brightness)
         var cursor = 0
