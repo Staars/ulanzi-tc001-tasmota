@@ -1,114 +1,82 @@
 import os
+import string
 from PIL import ImageFont
 
-def generate_font_blob(font_path, point_size, order, cell_width, cell_height):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    abs_font_path = os.path.join(script_dir, font_path)
-    if not os.path.exists(abs_font_path):
-        raise FileNotFoundError(f"Font file not found: {abs_font_path}")
-
-    font = ImageFont.truetype(abs_font_path, point_size)
-    widths = []
-    raw_bytes = bytearray()
-
-    for ch in order:
+def generate_font_map(font_path, point_size, cell_width, cell_height, characters):
+    font = ImageFont.truetype(font_path, point_size)
+    font_map = {}
+    for ch in characters:
         bitmap = font.getmask(ch)
-        w, h = bitmap.size
+        glyph_w, glyph_h = bitmap.size
+        hex_array = []
+        # Loop over the fixed cell height
+        for y in range(cell_height):
+            byte = 0
+            bit_count = 0
+            for x in range(cell_width):
+                # Only read pixels if inside the actual glyph bounds
+                if x < glyph_w and y < glyph_h and bitmap.getpixel((x, y)):
+                    byte |= 1 << (7 - bit_count)
+                bit_count += 1
+                if bit_count == 8:
+                    hex_array.append(byte)
+                    byte = 0
+                    bit_count = 0
+            if bit_count > 0:
+                hex_array.append(byte)
+        if not hex_array:
+            hex_array = [0]
+        # Store as a Berry bytes() literal string
+        bytes_literal = "bytes(\"" + "".join(f"{b:02x}" for b in hex_array) + "\")"
+        font_map[ch] = { 'data': bytes_literal, 'width': glyph_w }
+    return font_map
 
-        cols = []
-        for x in range(w):
-            col_byte = 0
-            for y in range(min(h, cell_height)):
-                if bitmap.getpixel((x, y)):
-                    col_byte |= 1 << (7 - y)
-            cols.append(col_byte)
+def write_fonts_be(output_path, mono5x8_map, tiny3x5_map):
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write("#@solidify:fonts\n")
+        f.write("var fonts = module(\"fonts\")\n\n")
+        f.write("fonts.font_map = {\n")
+        f.write("    'Mono5x8': {\n")
+        f.write("        'font': {\n")
+        for ch, info in mono5x8_map.items():
+            f.write(f"            '{ch}': {{ 'data': {info['data']}, 'width': {info['width']} }},\n")
+        f.write("        },\n")
+        f.write("        'width': 5,\n")
+        f.write("        'height': 8\n")
+        f.write("    },\n")
+        f.write("    'Tiny3x5': {\n")
+        f.write("        'font': {\n")
+        for ch, info in tiny3x5_map.items():
+            f.write(f"            '{ch}': {{ 'data': {info['data']}, 'width': {info['width']} }},\n")
+        f.write("        },\n")
+        f.write("        'width': 3,\n")
+        f.write("        'height': 5\n")
+        f.write("    }\n")
+        f.write("}\n\n")
+        f.write("def font_width(font, ch)\n")
+        f.write("    return font.font[ch].width\n")
+        f.write("end\n\n")
+        f.write("class Matrix end\n\n")
+        f.write("def glyph_matrix(font, ch)\n")
+        f.write("    var char_bitmap = font.font[ch].data\n")
+        f.write("    var bytes_per_line = (font.width + 7) >> 3\n")
+        f.write("    return Matrix(char_bitmap, bytes_per_line)\n")
+        f.write("end\n\n")
+        f.write("fonts.font_width = font_width\n")
+        f.write("fonts.glyph_matrix = glyph_matrix\n\n")
+        f.write("return fonts\n")
 
-        eff_w = 0
-        for cx in range(len(cols) - 1, -1, -1):
-            if cols[cx] != 0:
-                eff_w = cx + 1
-                break
-        widths.append(eff_w)
-
-        cols = cols[:cell_width] + [0] * (cell_width - len(cols))
-        raw_bytes.extend(cols)
-
-    packed_widths = bytearray()
-    for i in range(0, len(widths), 2):
-        w1 = widths[i] & 0x0F
-        w2 = widths[i + 1] & 0x0F if i + 1 < len(widths) else 0
-        packed_widths.append((w1 << 4) | w2)
-
-    return {
-        "width": cell_width,
-        "height": cell_height,
-        "first_char": ord(order[0]),
-        "count": len(order),
-        "widths_hex": packed_widths.hex(),
-        "data_hex": raw_bytes.hex()
-    }
+def main():
+    characters = list(string.ascii_uppercase + string.ascii_lowercase +
+                      string.digits + string.punctuation + " ")
+    # remove problematic chars for Berry keys
+    if "'" in characters:
+        characters.remove("'")
+    if "\\" in characters:
+        characters.remove("\\")
+    mono5x8_map = generate_font_map("./monomin-6x5.ttf", 7, 5, 8, characters)
+    tiny3x5_map = generate_font_map("./tiny-3x5.ttf", 5, 3, 5, characters)
+    write_fonts_be("./fonts.be", mono5x8_map, tiny3x5_map)
 
 if __name__ == "__main__":
-    order = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-
-    font_specs = [
-        {
-            "name": "Mono5x8",
-            "path": "monomin-6x5.ttf",
-            "size": 7,
-            "cell_width": 5,
-            "cell_height": 8
-        },
-        {
-            "name": "Tiny3x5",
-            "path": "tiny-3x5.ttf",
-            "size": 5,
-            "cell_width": 3,
-            "cell_height": 5
-        }
-    ]
-
-    print("#@solidify:fonts")
-    print("var fonts = module(\"fonts\")\n")
-
-    font_map_entries = []
-
-    for spec in font_specs:
-        packed = generate_font_blob(
-            spec["path"], spec["size"], order,
-            spec["cell_width"], spec["cell_height"]
-        )
-        var_name = spec["name"]
-        print(f"fonts.{var_name} = {{")
-        print(f"  'width': {packed['width']},")
-        print(f"  'height': {packed['height']},")
-        print(f"  'first_char': {packed['first_char']},")
-        print(f"  'count': {packed['count']},")
-        print(f"  'widths': bytes(\"{packed['widths_hex']}\"),")
-        print(f"  'data': bytes(\"{packed['data_hex']}\")")
-        print("}\n")
-        font_map_entries.append(f"    '{var_name}': fonts.{var_name}")
-
-    print("fonts.font_map = {")
-    print(",\n".join(font_map_entries))
-    print("}\n")
-
-    # Helpers as top-level defs, then assign to module
-    print("# Helper: unpack nibble-packed widths")
-    print("def font_width(font, idx)")
-    print("    var b = font.widths[idx >> 1]")
-    print("    return (idx & 1) == 0 ? ((b >> 4) & 0x0F) : (b & 0x0F)")
-    print("end\n")
-
-    print("# Helper: wrap a glyph's bit-lines directly as a 1‑bpp Matrix")
-    print("def glyph_matrix(font, idx)")
-    print("    var bytes_per_line = (font.width + 7) >> 3")
-    print("    var off = idx * bytes_per_line * font.height")
-    print("    var len = bytes_per_line * font.height")
-    print("    return Matrix(font.data[off .. off + len - 1], bytes_per_line)")
-    print("end\n")
-
-    print("fonts.font_width = font_width")
-    print("fonts.glyph_matrix = glyph_matrix\n")
-
-    print("return fonts")
+    main()
