@@ -1,9 +1,9 @@
 if tasmota.cmd("pixels")["Pixels"] != 256
     tasmota.cmd("pixels 256")
 end
-import ScreenManager
+#import ScreenManager
 
-_s = ScreenManager()
+#_s = ScreenManager()
 
 # tasmota.set_timer(20000,def() import fonts _screenManager.color = fonts.palette[_screenManager.getColor()] end)
 
@@ -20,4 +20,4 @@ end
 
 tasmota.set_timer(20000, get_w)
 
-tasmota.add_cron("* */15 * * * *",/->get_w(),"get_weather")
+#tasmota.add_cron("* */15 * * * *",/->get_w(),"get_weather")

@@ -3,25 +3,18 @@ class TWINKLE
     var fast_loop_closure
     var tick, frame_div
     var W, H
-    var pixels
+    var hue_buf, val_buf
 
     def init()
         self.W = 32
         self.H = 8
-
         self.strip = Leds(self.W * self.H, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
         self.matrix = Matrix(buf, self.W, self.H, bpp, true)
 
-        # Store current color of each pixel
-        self.pixels = []
-        var total = self.W * self.H
-        var i = 0
-        while i < total
-            self.pixels.push(0)
-            i += 1
-        end
+        self.hue_buf = bytes(-(self.W * self.H))
+        self.val_buf = bytes(-(self.W * self.H))
 
         self.tick = 0
         self.frame_div = 2  # adjust for speed
@@ -36,80 +29,41 @@ class TWINKLE
         tasmota.remove_driver(self)
     end
 
-    def fast_loop()
-        self.tick += 1
-        if self.tick % self.frame_div != 0
-            return
-        end
-        self.update_twinkle()
-        self.draw_twinkle()
+    def idx(x, y)
+        return y * self.W + x
     end
 
-    def hsv_to_rgb(h, s, v)
-        var r, g, b
-        var i = (h / 43) % 6
-        var f = (h % 43) * 6
-        var p = (v * (255 - s)) / 255
-        var q = (v * (255 - ((s * f) / 255))) / 255
-        var t = (v * (255 - ((s * (255 - f)) / 255))) / 255
-        if i == 0
-            r = v; g = t; b = p
-        elif i == 1
-            r = q; g = v; b = p
-        elif i == 2
-            r = p; g = v; b = t
-        elif i == 3
-            r = p; g = q; b = v
-        elif i == 4
-            r = t; g = p; b = v
-        else
-            r = v; g = p; b = q
-        end
-        return (r << 16) | (g << 8) | b
+    def fast_loop()
+        self.tick += 1
+        if self.tick % self.frame_div != 0 return end
+        self.update_twinkle()
+        self.draw_twinkle()
     end
 
     def update_twinkle()
         import crypto
         var total = self.W * self.H
-        var pix = self.pixels
 
-        # Fade all pixels slightly
+        # Fade all pixels slightly by reducing brightness
         var i = 0
         while i < total
-            var c = pix[i]
-            var r = (c >> 16) & 0xFF
-            var g = (c >> 8) & 0xFF
-            var b = c & 0xFF
-
-            if r > 5
-                r -= 5
+            var v = self.val_buf[i]
+            if v > 5
+                v -= 5
             else
-                r = 0
+                v = 0
             end
-
-            if g > 5
-                g -= 5
-            else
-                g = 0
-            end
-
-            if b > 5
-                b -= 5
-            else
-                b = 0
-            end
-
-            pix[i] = (r << 16) | (g << 8) | b
+            self.val_buf[i] = v
             i += 1
         end
 
         # Randomly light up a few new twinkles
-        var new_count = 3  # how many per frame
+        var new_count = 3
         var n = 0
         while n < new_count
             var idx = crypto.random(1)[0] % total
-            var hue = crypto.random(1)[0]
-            pix[idx] = self.hsv_to_rgb(hue, 200, 255)
+            self.hue_buf[idx] = crypto.random(1)[0]  # random hue
+            self.val_buf[idx] = 255                   # full brightness
             n += 1
         end
     end
@@ -117,13 +71,19 @@ class TWINKLE
     def draw_twinkle()
         var w = self.W
         var h = self.H
-        var pix = self.pixels
+        var hue = self.hue_buf
+        var val = self.val_buf
         var y = 0
         while y < h
             var x = 0
             while x < w
-                var idx = y * w + x
-                self.matrix.set(x, y, pix[idx])
+                var k = y * w + x
+                var v = val[k]
+                if v > 0
+                    self.matrix.set(x, y, hue[k], 200, v)  # fixed saturation=200
+                else
+                    self.matrix.set(x, y, 0, 0, 0)          # off
+                end
                 x += 1
             end
             y += 1
@@ -132,5 +92,4 @@ class TWINKLE
     end
 end
 
-# Start the Twinkle effect
-var twinkle = TWINKLE()
+var anim = TWINKLE()

@@ -4,21 +4,24 @@ class METEOR_RAIN
     var tick, frame_div
     var W, H
     var hue, meteor_pos, meteor_len
+    var hue_buf, val_buf   # per-pixel hue and brightness
 
     def init()
         self.W = 32
         self.H = 8
-
         self.strip = Leds(self.W * self.H, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
         self.matrix = Matrix(buf, self.W, self.H, bpp, true)
 
         self.tick = 0
-        self.frame_div = 1  # adjust for speed
+        self.frame_div = 1
         self.hue = 0
         self.meteor_pos = 0
-        self.meteor_len = 6  # trail length
+        self.meteor_len = 6
+
+        self.hue_buf = bytes(-(self.W * self.H))
+        self.val_buf = bytes(-(self.W * self.H))
 
         self.fast_loop_closure = def () self.fast_loop() end
         tasmota.add_fast_loop(self.fast_loop_closure)
@@ -30,95 +33,72 @@ class METEOR_RAIN
         tasmota.remove_driver(self)
     end
 
+    def idx(x, y)
+        return y * self.W + x
+    end
+
     def fast_loop()
         self.tick += 1
-        if self.tick % self.frame_div != 0
-            return
-        end
+        if self.tick % self.frame_div != 0 return end
         self.update_meteor()
     end
 
-    def hsv_to_rgb(h, s, v)
-        var r, g, b
-        var i = (h / 43) % 6
-        var f = (h % 43) * 6
-        var p = (v * (255 - s)) / 255
-        var q = (v * (255 - ((s * f) / 255))) / 255
-        var t = (v * (255 - ((s * (255 - f)) / 255))) / 255
-        if i == 0
-            r = v; g = t; b = p
-        elif i == 1
-            r = q; g = v; b = p
-        elif i == 2
-            r = p; g = v; b = t
-        elif i == 3
-            r = p; g = q; b = v
-        elif i == 4
-            r = t; g = p; b = v
-        else
-            r = v; g = p; b = q
-        end
-        return (r << 16) | (g << 8) | b
-    end
-
     def fade_all()
-        var w = self.W
-        var h = self.H
-        var y = 0
-        while y < h
-            var x = 0
-            while x < w
-                var c = self.matrix.get(x, y)
-                var r = (c >> 16) & 0xFF
-                var g = (c >> 8) & 0xFF
-                var b = c & 0xFF
-
-                if r > 10
-                    r -= 10
-                else
-                    r = 0
-                end
-                if g > 10
-                    g -= 10
-                else
-                    g = 0
-                end
-                if b > 10
-                    b -= 10
-                else
-                    b = 0
-                end
-
-                self.matrix.set(x, y, (r << 16) | (g << 8) | b)
-                x += 1
+        var n = self.W * self.H
+        var i = 0
+        while i < n
+            var v = self.val_buf[i]
+            if v > 10
+                v -= 10
+            else
+                v = 0
             end
-            y += 1
+            self.val_buf[i] = v
+            i += 1
         end
     end
 
     def update_meteor()
         self.fade_all()
 
-        var w = self.W
-        var h = self.H
-        var col = self.hsv_to_rgb(self.hue, 255, 255)
-
-        # Draw meteor vertically down column meteor_pos
+        # Draw meteor trail in hue/val buffers
         var y = 0
-        while y < self.meteor_len && y < h
-            self.matrix.set(self.meteor_pos, y, col)
+        while y < self.meteor_len && y < self.H
+            var k = self.idx(self.meteor_pos, y)
+            self.hue_buf[k] = self.hue
+            # fade along the trail: head bright, tail dimmer
+            var v = 255 - (y * (255 / self.meteor_len))
+            if v < 0 v = 0 end
+            self.val_buf[k] = v
             y += 1
+        end
+
+        # Render all pixels from hue/val buffers
+        var yy = 0
+        while yy < self.H
+            var xx = 0
+            while xx < self.W
+                var k = self.idx(xx, yy)
+                var v = self.val_buf[k]
+                if v > 0
+                    self.matrix.set(xx, yy, self.hue_buf[k], 255, v)
+                else
+                    self.matrix.set(xx, yy, 0, 0, 0)
+                end
+                xx += 1
+            end
+            yy += 1
         end
 
         self.strip.show()
 
         # Move meteor
         self.meteor_pos += 1
-        if self.meteor_pos >= w
+        if self.meteor_pos >= self.W
             self.meteor_pos = 0
-            self.hue = (self.hue + 32) % 256  # change color each pass
+            self.hue = (self.hue + 32) % 256
         end
     end
 end
 
-var meteor = METEOR_RAIN()
+var anim = METEOR_RAIN()

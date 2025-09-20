@@ -4,21 +4,23 @@ class CRAZY_BEES
     var tick, frame_div
     var W, H
     var bees, num_bees
+    var hue_buf, val_buf   # linear buffers, size W*H
 
     def init()
         self.W = 32
         self.H = 8
-
         self.strip = Leds(self.W * self.H, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
         self.matrix = Matrix(buf, self.W, self.H, bpp, true)
 
         self.tick = 0
-        self.frame_div = 1  # fast movement
-        self.num_bees = 5   # number of bees
+        self.frame_div = 1
+        self.num_bees = 5
 
-        # Each bee: [x, y, target_x, target_y, color]
+        self.hue_buf = bytes(-(self.W * self.H))
+        self.val_buf = bytes(-(self.W * self.H))
+
         self.bees = []
         import crypto
         var i = 0
@@ -28,7 +30,7 @@ class CRAZY_BEES
             var tx = crypto.random(1)[0] % self.W
             var ty = crypto.random(1)[0] % self.H
             var hue = crypto.random(1)[0]
-            self.bees.push([bx, by, tx, ty, self.hsv_to_rgb(hue, 255, 255)])
+            self.bees.push([bx, by, tx, ty, hue])  # [x, y, target_x, target_y, hue]
             i += 1
         end
 
@@ -44,34 +46,13 @@ class CRAZY_BEES
 
     def fast_loop()
         self.tick += 1
-        if self.tick % self.frame_div != 0
-            return
-        end
+        if self.tick % self.frame_div != 0 return end
         self.update_bees()
         self.draw_bees()
     end
 
-    def hsv_to_rgb(h, s, v)
-        var r, g, b
-        var i = (h / 43) % 6
-        var f = (h % 43) * 6
-        var p = (v * (255 - s)) / 255
-        var q = (v * (255 - ((s * f) / 255))) / 255
-        var t = (v * (255 - ((s * (255 - f)) / 255))) / 255
-        if i == 0
-            r = v; g = t; b = p
-        elif i == 1
-            r = q; g = v; b = p
-        elif i == 2
-            r = p; g = v; b = t
-        elif i == 3
-            r = p; g = q; b = v
-        elif i == 4
-            r = t; g = p; b = v
-        else
-            r = v; g = p; b = q
-        end
-        return (r << 16) | (g << 8) | b
+    def idx(x, y)
+        return y * self.W + x
     end
 
     def update_bees()
@@ -84,7 +65,6 @@ class CRAZY_BEES
             var tx = bee[2]
             var ty = bee[3]
 
-            # Move bee toward target
             if bx < tx
                 bx += 1
             elif bx > tx
@@ -96,72 +76,72 @@ class CRAZY_BEES
                 by -= 1
             end
 
-            # If bee reached target, pick a new flower
             if bx == tx && by == ty
                 tx = crypto.random(1)[0] % self.W
                 ty = crypto.random(1)[0] % self.H
-                var hue = crypto.random(1)[0]
-                bee[4] = self.hsv_to_rgb(hue, 255, 255)
+                bee[4] = crypto.random(1)[0]  # new hue
             end
 
             bee[0] = bx
             bee[1] = by
             bee[2] = tx
             bee[3] = ty
-
             self.bees[i] = bee
             i += 1
         end
     end
 
     def draw_bees()
-        # Fade background slightly for trails
         var w = self.W
         var h = self.H
+        var hue = self.hue_buf
+        var val = self.val_buf
+
+        # decay trails in value buffer
+        var n = w * h
+        var i = 0
+        while i < n
+            var v = val[i]
+            if v > 20
+                v -= 20
+            else
+                v = 0
+            end
+            val[i] = v
+            i += 1
+        end
+
+        # stamp bees at full brightness, keep their hue
+        i = 0
+        while i < self.num_bees
+            var bee = self.bees[i]
+            var x = bee[0]
+            var y = bee[1]
+            var k = self.idx(x, y)
+            hue[k] = bee[4]
+            val[k] = 255
+            i += 1
+        end
+
+        # render entire frame using HSV buffers (saturation fixed at 255)
         var y = 0
         while y < h
             var x = 0
             while x < w
-                var c = self.matrix.get(x, y)
-                var r = (c >> 16) & 0xFF
-                var g = (c >> 8) & 0xFF
-                var b = c & 0xFF
-
-                if r > 20
-                    r -= 20
+                var k = y * w + x
+                var v = val[k]
+                if v > 0
+                    self.matrix.set(x, y, hue[k], 255, v)
                 else
-                    r = 0
+                    self.matrix.set(x, y, 0, 0, 0)
                 end
-
-                if g > 20
-                    g -= 20
-                else
-                    g = 0
-                end
-
-                if b > 20
-                    b -= 20
-                else
-                    b = 0
-                end
-
-                self.matrix.set(x, y, (r << 16) | (g << 8) | b)
                 x += 1
             end
             y += 1
-        end
-
-        # Draw bees
-        var i = 0
-        while i < self.num_bees
-            var bee = self.bees[i]
-            self.matrix.set(bee[0], bee[1], bee[4])
-            i += 1
         end
 
         self.strip.show()
     end
 end
 
-# Start the Crazy Bees effect
-var bees = CRAZY_BEES()
+var anim = CRAZY_BEES()

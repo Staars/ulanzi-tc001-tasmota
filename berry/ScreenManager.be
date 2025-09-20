@@ -39,7 +39,7 @@ class ScreenManager
         var matrix_width = 32
         var matrix_height = 8
 
-        self.matrixController = MatrixController(matrix_width, matrix_height, gpio.pin(gpio.WS2812, 2))
+        self.matrixController = MatrixController(matrix_width, matrix_height, gpio.pin(gpio.WS2812, 32))
         self.offscreenController = MatrixController(matrix_width, matrix_height, -1) # -1 is a dummy pin, that MUST not be configured for WS2812
 
         self.brightness = 40;
@@ -55,7 +55,7 @@ class ScreenManager
         self.loop_50ms = /->self.currentScreen.loop()
         self.changeCounter = 0
         self.segueCtr = 0
-        mqtt.subscribe("ulanzi_alert")
+        # mqtt.subscribe("ulanzi_alert")
         tasmota.add_driver(self)
     end
 
