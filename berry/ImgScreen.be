@@ -32,10 +32,7 @@ class ImgScreen: BaseScreen
         self.showImg(screen)
         var rtc = tasmota.rtc()
         var time_str = tasmota.strftime('%H:%M', rtc['local'])
-        var x_offset = 12
-        var y_offset = 0
-
-        screen.print_string(time_str, x_offset, y_offset, true,
+        screen.print_string(time_str, 12, 2, true,
                             self.screenManager.color, self.screenManager.brightness)
     end
 end

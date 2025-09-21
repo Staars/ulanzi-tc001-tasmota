@@ -22,7 +22,6 @@ class BatteryScreen: BaseScreen
         var value = ULP.get_mem(33)
        
         var x_offset = 2
-        var y_offset = 0
         var bat_str = "???"
 
         if self.showVoltage
@@ -43,7 +42,7 @@ class BatteryScreen: BaseScreen
             bat_str = 'BAT' + format("%3i", value) + "%"
         end
 
-        screen.print_string(bat_str, x_offset, y_offset, true, self.screenManager.color, self.screenManager.brightness)
+        screen.print_string(bat_str, x_offset, 2, true, self.screenManager.color, self.screenManager.brightness)
     end
 end
 

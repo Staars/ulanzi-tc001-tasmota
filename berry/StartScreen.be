@@ -10,7 +10,7 @@ class StartScreen: BaseScreen
         super(self).init(screenManager)
         self.screenManager.change_font('MatrixDisplay3x5')
 
-        self.img = bytes()
+        self.img = bytes(192)
         self.img_matrix = util.imgFromFile(self.img, "Tasmota.bin", 8, 8, 3)
     end
 
@@ -21,14 +21,10 @@ class StartScreen: BaseScreen
     def render(segue)
         var screen = segue ? self.offscreenController : self.matrixController
         screen.clear()
-
         self.showImg(screen)
 
         var hello_str = "...boot!"
-        var x_offset = 9
-        var y_offset = 0
-
-        screen.print_string(hello_str, x_offset, y_offset, true,
+        screen.print_string(hello_str, 9, 2, true,
                             0x444444, self.screenManager.brightness)
     end
 end

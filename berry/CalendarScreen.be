@@ -19,7 +19,7 @@ class CalendarScreen: BaseScreen
 
     def drawBars(screen)
         var wd = tasmota.time_dump(tasmota.rtc()["local"])["weekday"]
-        var i = 10
+        var i = 12
         var day = 1
         while i < 30
             var color = day == wd ? self.screenManager.color : 0x606060
@@ -37,9 +37,9 @@ class CalendarScreen: BaseScreen
         self.drawBars(screen)
         var rtc = tasmota.rtc()
         var day_str = tasmota.strftime('%d', rtc['local'])
-        screen.print_string(day_str, 1, 1, true, 0x101010, self.screenManager.brightness)
+        screen.print_string(day_str, 1, 2, true, 0x101010, self.screenManager.brightness)
         var time_str = tasmota.strftime('%H:%M', rtc['local'])
-        screen.print_string(time_str, 12, -1, true, self.screenManager.color, self.screenManager.brightness)
+        screen.print_string(time_str, 12, 1, true, self.screenManager.color, self.screenManager.brightness)
     end
 end
 

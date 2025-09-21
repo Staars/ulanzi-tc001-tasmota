@@ -8,7 +8,7 @@ class WeatherScreen: BaseScreen
         super(self).init(screenManager)
         self.screenManager.change_font('MatrixDisplay3x5')
 
-        self.img = bytes()
+        self.img = bytes(192)
         self.frames = util.animFromFile(self.img, "weather.bin", 8, 8, 3)
         self.img_idx = 0
     end
@@ -32,10 +32,10 @@ class WeatherScreen: BaseScreen
         self.showImg(screen)
         import global
         var temperature = global.weather_data['current']['temperature_2m']
-        var time_str = format("%.1f `C", temperature)
+        var time_str = format("%.1f`C", temperature)
         var x_offset = 10
         if temperature < 10 x_offset += 4 end
-        screen.print_string(time_str, x_offset, 0, true, self.screenManager.color, self.screenManager.brightness)
+        screen.print_string(time_str, x_offset, 2, true, self.screenManager.color, self.screenManager.brightness)
     end
 end
 

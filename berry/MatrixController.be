@@ -75,7 +75,7 @@ class MatrixController
         for i: 0..(size(string)-1)
             if x + char_offset > 1 - self.font_width
                 var actual_width = self.print_char(string[i], x + char_offset, y, collapse, color, brightness)
-                char_offset += actual_width + 1
+                char_offset += actual_width
             end
         end
     end
