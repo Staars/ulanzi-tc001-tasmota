@@ -82,8 +82,9 @@ files = [
 "weather.bin",
 "WeatherScreen.be"
 ]
-
+import path
 for f:files
+ path.remove(f"/{f}")
  l(f)
 end
 ```

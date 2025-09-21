@@ -43,7 +43,7 @@ class ScreenManager
         self.offscreenController = MatrixController(matrix_width, matrix_height, -1) # -1 is a dummy pin, that MUST not be configured for WS2812
 
         self.brightness = 40;
-        self.color = fonts.palette[self.getColor()]
+        self.color = self.getColor()
 
         self.initULP()
 
@@ -96,9 +96,9 @@ class ScreenManager
 
     def getColor()
         if tasmota.wifi()["up"] == true
-            return 'white'
+            return 0xffffff
         else
-            return 'white' # for demo use white anyway
+            return 0xffffff # for demo use white anyway
         end
     end
 

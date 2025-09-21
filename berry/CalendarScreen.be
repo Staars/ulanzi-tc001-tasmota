@@ -21,9 +21,9 @@ class CalendarScreen: BaseScreen
     def drawBars(screen)
         var wd = tasmota.time_dump(tasmota.rtc()["local"])["weekday"]
         var i = 10
-        var day = 1
+        var day = 0
         while i < 30
-            var color = day == wd ? self.screenManager.color : 0x606060
+            var color = day == wd ? self.screenManager.color : (self.screenManager.color / 5)
             screen.matrix.set(i, 7, color, self.screenManager.brightness)
             screen.matrix.set(i+1, 7, color, self.screenManager.brightness)
             i += 3
