@@ -4,6 +4,8 @@ import util
 class ImgScreen: BaseScreen
 
     var frames, img_idx, img
+    static isAuto
+
 
     def init(screenManager)
         super(self).init(screenManager)

@@ -14,7 +14,7 @@ class AlertScreen: BaseScreen
         self.screenManager.change_font('TinyUnicode')
 
         self.textPosition = 0
-        self.text = " >> "
+        self.text = " >> Demo alert !! >>"
         self.duration = 20
 
         self.img = bytes(192)

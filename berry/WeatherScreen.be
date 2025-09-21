@@ -3,6 +3,7 @@ import util
 
 class WeatherScreen: BaseScreen
     var img, frames, img_idx
+    static isAuto
 
     def init(screenManager)
         super(self).init(screenManager)

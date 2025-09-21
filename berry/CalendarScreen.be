@@ -3,6 +3,7 @@ import util
 
 class CalendarScreen: BaseScreen
     var img, img_matrix, img_idx
+    static isAuto
 
     def init(screenManager)
         super(self).init(screenManager)
@@ -19,7 +20,7 @@ class CalendarScreen: BaseScreen
 
     def drawBars(screen)
         var wd = tasmota.time_dump(tasmota.rtc()["local"])["weekday"]
-        var i = 12
+        var i = 10
         var day = 1
         while i < 30
             var color = day == wd ? self.screenManager.color : 0x606060
