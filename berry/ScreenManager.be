@@ -7,12 +7,14 @@ import StartScreen
 import CalendarScreen
 import WeatherScreen
 import AlertScreen
+import BatteryScreen
 
 var Screens = [
     StartScreen, # only shown once
-    WeatherScreen,
     CalendarScreen,
+    BatteryScreen,
     BasicScreen,
+    WeatherScreen,
     NetScreen,
     ImgScreen,
     AlertScreen, # only shown on event
@@ -24,8 +26,8 @@ class ScreenManager
     var color
     var currentScreen
     var currentScreenIdx
-    var nextScreen, segueCtr, loop_50ms, outShiftBuffer, trashBuffer
-    var changeCounter
+    var nextScreen, segueCtr, loop_50ms
+    var changeCounter, autoMode
 
 
     def init()
@@ -37,11 +39,11 @@ class ScreenManager
         var matrix_width = 32
         var matrix_height = 8
 
-        self.matrixController = MatrixController(matrix_width, matrix_height, gpio.pin(gpio.WS2812, 0))
-        self.offscreenController = MatrixController(matrix_width, matrix_height,1) # 1 is a dummy pin, that MUST not be configured for WS2812
+        self.matrixController = MatrixController(matrix_width, matrix_height, gpio.pin(gpio.WS2812, 32))
+        self.offscreenController = MatrixController(matrix_width, matrix_height, -1) # -1 is a dummy pin, that MUST not be configured for WS2812
 
         self.brightness = 40;
-        self.color = fonts.palette[self.getColor()]
+        self.color = self.getColor()
 
         self.initULP()
 
@@ -51,12 +53,21 @@ class ScreenManager
         self.currentScreenIdx = 0
         self.currentScreen = Screens[self.currentScreenIdx](self)
         self.loop_50ms = /->self.currentScreen.loop()
-        self.outShiftBuffer = bytes(-(matrix_width * 3)) # or height, if height > width
-        self.trashBuffer = bytes(-(matrix_width * 3))
         self.changeCounter = 0
+        self.autoMode = true
         self.segueCtr = 0
+        # mqtt.subscribe("ulanzi_alert")
+        tasmota.add_driver(self)
+    end
 
-        mqtt.subscribe("ulanzi_alert")
+    def deinit()
+        import mqtt
+        tasmota.remove_driver(self)
+        mqtt.unsubscribe("ulanzi_alert")
+        for i:global.Screens
+            i = nil
+        end
+        global.Screens = nil
     end
 
     def initULP()
@@ -85,9 +96,9 @@ class ScreenManager
 
     def getColor()
         if tasmota.wifi()["up"] == true
-            return 'white'
+            return 0xffffff
         else
-            return 'white' # for demo use white anyway
+            return 0xffffff # for demo use white anyway
         end
     end
 
@@ -102,8 +113,7 @@ class ScreenManager
 
     def on_button_action()
         import introspect
-        var handleActionMethod = introspect.get(self.currentScreen, "handleActionButton");
-
+        var handleActionMethod = introspect.get(self.currentScreen, "handleActionButton")
         if handleActionMethod != nil
             self.currentScreen.handleActionButton()
         end
@@ -113,12 +123,27 @@ class ScreenManager
         self.initSegue(1)
     end
 
+    def getNextScreenIdx(steps)
+        if self.autoMode
+            import introspect
+            var idx = self.currentScreenIdx
+            while idx != false
+                idx += 1
+                if introspect.contains(Screens[(idx) % (size(Screens) - 1)], "isAuto") == true 
+                    print("got autoscreen",idx)
+                    return (idx) % (size(Screens) - 1)
+                end
+            end
+        end
+        return (self.currentScreenIdx + steps) % (size(Screens) - 1)
+    end
+
     def initSegue(steps, screenIdx)
         if screenIdx
             self.currentScreenIdx = screenIdx # info/alert message or other override
             print("override screen with alert")
         else
-            self.currentScreenIdx = (self.currentScreenIdx + steps) % (size(Screens) - 1)
+            self.currentScreenIdx = self.getNextScreenIdx(steps)
         end
         if self.currentScreenIdx == 0 self.currentScreenIdx = 1 end # optional: show screen 0 only after reboot
         self.nextScreen = Screens[self.currentScreenIdx](self)
@@ -129,8 +154,8 @@ class ScreenManager
     end
 
     def doSegue(direction)
-        self.offscreenController.matrix.scroll(direction, self.outShiftBuffer)
-        self.matrixController.matrix.scroll(direction, self.trashBuffer, self.outShiftBuffer)
+        self.offscreenController.matrix.scroll(direction)
+        self.matrixController.matrix.scroll(direction, self.offscreenController.matrix)
         self.matrixController.draw()
 
         self.segueCtr -= 1
@@ -143,6 +168,7 @@ class ScreenManager
     end
 
     def autoChangeScreen()
+        if self.autoMode == false return end
         if self.changeCounter == self.currentScreen.duration
             self.on_button_next()
             self.changeCounter = 0
@@ -174,15 +200,24 @@ class ScreenManager
 
         import ULP
         var gpio = ULP.get_mem(36) # low
+        var prev, next
         if gpio & (1<<7) == 0
-            self.on_button_prev()
-            return
+            prev = true
         end
         gpio = ULP.get_mem(37) # high
         if gpio & (1<<0) == 0
-            self.on_button_next()
+            next = true
         elif gpio & (1<<1) == 0
             self.on_button_action()
+        end
+        if prev && next == true
+            self.autoMode = !self.autoMode
+            return
+        end
+        if prev == true
+            self.on_button_prev()
+        elif next == true
+            self.on_button_next()
         end
     end
 

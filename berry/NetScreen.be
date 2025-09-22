@@ -32,7 +32,6 @@ class NetScreen: BaseScreen
         var wifiInfo = tasmota.wifi()
 
         var x_offset = 1
-        var y_offset = 1
         var wifi_str = "???"
         var _pageSize = pageSize
 
@@ -78,7 +77,7 @@ class NetScreen: BaseScreen
             self.displayTimeCounter = 0
         end
 
-        screen.print_string(wifi_str, x_offset, y_offset, true, self.screenManager.color, self.screenManager.brightness)
+        screen.print_string(wifi_str, x_offset, 2, true, self.screenManager.color, self.screenManager.brightness)
     end
 end
 

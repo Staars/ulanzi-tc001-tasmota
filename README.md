@@ -25,3 +25,66 @@ To install Tasmota firmware on the Ulanzi TC001, follow these steps:
 - To give exclusive matrix access to Berry:
   - Set the real GPIO 32 to WS2812 ID 2
   - Remember that the WS2812 ID starts at 0 in berry
+
+```
+[env:tasmota32-ulanzi]
+extends                 = env:tasmota32_base
+build_flags             = ${env:tasmota32_base.build_flags}
+                          -DFIRMWARE_BLUETOOTH
+                          -DUSE_MI_EXT_GUI
+                          -DUSE_BERRY_ULP
+                          -DUSE_RTC_CHIPS
+                          -DUSE_DS3231
+                          -DUSE_SHT3X
+                          -DOTA_URL='"http://ota.tasmota.com/tasmota32/release/tasmota32-bluetooth.bin"'
+lib_extra_dirs          = lib/libesp32, lib/libesp32_div, lib/lib_basic, lib/lib_i2c, lib/lib_ssl
+lib_ignore              =   Micro-RTSP
+custom_berry_solidify   = https://raw.githubusercontent.com/Staars/ulanzi-tc001-tasmota/refs/heads/master/berry/fonts.be
+```
+
+
+### Easy upload
+
+- get IP of computer, like `ipconfig getifaddr en0`
+- run `python3 -m http.server 8000` in berry folder
+- start berry script on Ulanzi clock:
+
+```
+def l(name)
+var cl = webclient()
+cl.begin(f"http://<IP of computer>:8000/{name}")
+var r = cl.GET()
+print(r)
+cl.write_file(f"/{name}")
+cl.close()
+end
+
+# modify if needed
+files = [
+"AlertScreen.be",
+"autoexec.be",
+"BaseScreen.be",
+"BasicScreen.be",
+"BatteryScreen.be",
+"cal.bin",
+"CalendarScreen.be",
+"caution.bin",
+"fonts.be",
+"ImgScreen.be",
+"MatrixController.be",
+"NetScreen.be",
+"red_eye.bin",
+"ScreenManager.be",
+"StartScreen.be",
+"Tasmota.bin",
+"TsensScreen.be",
+"util.be",
+"weather.bin",
+"WeatherScreen.be"
+]
+import path
+for f:files
+ path.remove(f"/{f}")
+ l(f)
+end
+```

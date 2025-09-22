@@ -1,10 +1,11 @@
-import ScreenManager
+if tasmota.cmd("pixels")["Pixels"] != 256
+    tasmota.cmd("pixels 256")
+end
+#import ScreenManager
 
-_screenManager = ScreenManager()
+#_s = ScreenManager()
 
 # tasmota.set_timer(20000,def() import fonts _screenManager.color = fonts.palette[_screenManager.getColor()] end)
-
-tasmota.add_driver(_screenManager)
 
 def get_w()
     import json
@@ -17,4 +18,6 @@ def get_w()
     global.weather_data = json.load(cl.get_string())
 end
 
-tasmota.add_cron("* */15 * * * *",/->get_w())
+tasmota.set_timer(20000, get_w)
+
+#tasmota.add_cron("* */15 * * * *",/->get_w(),"get_weather")
