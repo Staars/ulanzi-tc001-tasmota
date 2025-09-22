@@ -8,7 +8,7 @@ class WAVE_WASH
         self.W = 32
         self.H = 8
         self.strip = Leds(self.W * self.H, gpio.pin(gpio.WS2812, 32))
-        self.matrix = Matrix(self.strip.pixels_buffer(), self.W, self.H, self.strip.pixel_size(), true)
+        self.matrix = pixmat(self.strip.pixels_buffer(), self.W, self.H, self.strip.pixel_size(), true)
         tasmota.add_driver(self)
     end
 

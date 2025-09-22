@@ -21,12 +21,12 @@ class MatrixController
             self.leds = Leds(self.row_size * self.col_size, p)
             var buf = self.leds.pixels_buffer()
             var bpp = self.leds.pixel_size()
-            self.matrix = Matrix(buf, self.col_size, self.row_size, bpp, true)  # serpentine
+            self.matrix = pixmat(buf, self.col_size, self.row_size, bpp, true)  # serpentine
             self.leds.set_bri(127)  # default brightness / emulator
         else
             # --- Offscreen/virtual mode ---
             var bpp = 3  # RGB
-            self.matrix = Matrix(self.col_size, self.row_size, bpp, true)  # serpentine
+            self.matrix = pixmat(self.col_size, self.row_size, bpp, true)  # serpentine
             self.leds = nil
         end
 
@@ -65,7 +65,7 @@ class MatrixController
 
         var glyph = self.font[char]
         var char_bitmap = bytes().fromb64(glyph['b'])
-        self.matrix.blit(Matrix(char_bitmap, 1), x, y + glyph['y'], brightness, color)
+        self.matrix.blit(pixmat(char_bitmap, 1), x, y + glyph['y'], brightness, color)
 
         return collapse ? glyph['w'] + 1 : self.font_width
     end

@@ -1,7 +1,7 @@
 # === Setup ===
 leds = Leds(8 * 32, gpio.pin(gpio.WS2812, 0))
 buf = leds.pixels_buffer()
-m = Matrix(buf, 32, 8, 3, true)   # serpentine = true
+m = pixmat(buf, 32, 8, 3, true)   # serpentine = true
 
 # === Helper: show and pause ===
 def show_pause(ms)

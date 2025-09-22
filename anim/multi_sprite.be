@@ -10,7 +10,7 @@ class MULTI_SPRITE_TINT_DEMO
         self.strip = Leds(32 * 8, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, 32, 8, bpp, true)
+        self.matrix = pixmat(buf, 32, 8, bpp, true)
 
         var smiley_mono = [
             0,   180, 200, 180,   0,
@@ -35,9 +35,9 @@ class MULTI_SPRITE_TINT_DEMO
         ]
 
         self.sprites = [
-            [5, 5, Matrix(bytes(-(5*5)), 5, 5, 1, false)],
-            [5, 5, Matrix(bytes(-(5*5)), 5, 5, 1, false)],
-            [5, 5, Matrix(bytes(-(5*5)), 5, 5, 1, false)]
+            [5, 5, pixmat(bytes(-(5*5)), 5, 5, 1, false)],
+            [5, 5, pixmat(bytes(-(5*5)), 5, 5, 1, false)],
+            [5, 5, pixmat(bytes(-(5*5)), 5, 5, 1, false)]
         ]
         self.fillMono(self.sprites[0][2], smiley_mono)
         self.fillMono(self.sprites[1][2], heart_mono)
@@ -46,7 +46,7 @@ class MULTI_SPRITE_TINT_DEMO
         # --- New 4th sprite: 8×4 pixels from bit_lines ---
         # Example pattern: arrow shape
         var arrow_bits = bytes("183c7eff")  # rows: 0x18,0x3C,0x7E,0xFF
-        self.sprites.push([8, 4, Matrix(arrow_bits, 1)])
+        self.sprites.push([8, 4, pixmat(arrow_bits, 1)])
 
         self.actors = [
             [0, 0, 0, 1, 1,   0xFFFF00, 255],

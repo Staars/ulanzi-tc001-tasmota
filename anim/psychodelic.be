@@ -19,7 +19,7 @@ class PSYCHEDELIC_SCROLL_LAYERED
         self.strip = Leds(32 * 8, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, 32, 8, bpp, true)
+        self.matrix = pixmat(buf, 32, 8, bpp, true)
 
         self.tick = 0
         self.frame_div = 3  # slower updates

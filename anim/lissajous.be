@@ -17,7 +17,7 @@ class LISSAJOUS_2D
         self.strip = Leds(self.cols * self.rows, gpio.pin(gpio.WS2812, 2))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, self.cols, self.rows, bpp, true)
+        self.matrix = pixmat(buf, self.cols, self.rows, bpp, true)
 
         self.speed = 5  # Reduced for better visibility
         self.custom3 = 0

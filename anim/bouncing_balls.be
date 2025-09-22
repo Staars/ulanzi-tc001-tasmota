@@ -12,7 +12,7 @@ class BOUNCING_BALLS
         self.strip = Leds(self.W * self.H, gpio.pin(gpio.WS2812, 32))
         var buf = self.strip.pixels_buffer()
         var bpp = self.strip.pixel_size()
-        self.matrix = Matrix(buf, self.W, self.H, bpp, true)
+        self.matrix = pixmat(buf, self.W, self.H, bpp, true)
 
         self.tick = 0
         self.frame_div = 1

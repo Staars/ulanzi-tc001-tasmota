@@ -18,7 +18,7 @@ class FIRE2012_DEMO_BYTES
         self.strip = Leds(self.total, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, self.W, self.H, bpp, true)
+        self.matrix = pixmat(buf, self.W, self.H, bpp, true)
 
         # Heat buffer: fixed size, all zeros (optimized initialization)
         self.heat = bytes(-self.total)

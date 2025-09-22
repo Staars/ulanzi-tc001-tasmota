@@ -14,13 +14,13 @@ def splitStringToChunks(value, chunkSize)
     return output
 end
 
-class Matrix end
+class pixmat end
 
 def imgFromFile(buf, filename, width, height, bpp)
     var f = open(filename, "r")
     buf .. f.readbytes()
     f.close()
-    return Matrix(buf, width, height, bpp, false)
+    return pixmat(buf, width, height, bpp, false)
 end
 
 def animFromFile(buf, filename, width, height, bpp)
@@ -35,7 +35,7 @@ def animFromFile(buf, filename, width, height, bpp)
     var i = 0
     var pos = 0
     while i < frame_count
-        frames.push(Matrix(buf[pos .. pos + frame_len - 1], width, height, bpp, false))
+        frames.push(pixmat(buf[pos .. pos + frame_len - 1], width, height, bpp, false))
         pos += frame_len
         i += 1
     end

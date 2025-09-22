@@ -38,7 +38,7 @@ class SENDING_EFFECTS
         tasmota.remove_driver(self)
     end
 
-    # Wu‑pixel vertical draw (8.8 fixed‑point Y)
+    # Wu‑pixel vertical draw
     def wu_pixelY(x, y_fp, hue, sat, val)
         var yy = y_fp & 0xff
         var iy = 255 - yy
@@ -168,6 +168,7 @@ class SENDING_EFFECTS
                     sum += self.dist(i, j, s, int(self.posY[s] / 256)) / 2
                     s += 1
                 end
+                # Heat palette approximation: hue from sum
                 self.matrix.set(i, j, (sum + 128) % 256, 255, 255)
                 j += 1
             end
@@ -182,6 +183,7 @@ class SENDING_EFFECTS
     end
 
     def draw()
+        # Choose which effect to run
         var regime = 1  # 1 = sendVoxelsV2, 2 = LavaSending
         if regime == 1
             self.send_voxels_v2()

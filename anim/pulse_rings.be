@@ -9,11 +9,11 @@ class PULSE_RINGS
     var frame, bpp
 
     def init()
-        # Create LED strip and wrap in Matrix (serpentine handled in C++)
+        # Create LED strip and wrap in pixmat (serpentine handled in C++)
         self.strip = Leds(32 * 8, gpio.pin(gpio.WS2812, 32))
         self.bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, 32, 8, self.bpp, true)
+        self.matrix = pixmat(buf, 32, 8, self.bpp, true)
 
         self.frame = 0
         tasmota.add_driver(self)

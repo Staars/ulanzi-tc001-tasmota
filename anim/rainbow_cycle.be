@@ -12,7 +12,7 @@ class RAINBOW_CYCLE
         self.strip = Leds(self.W * self.H, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, self.W, self.H, bpp, true)
+        self.matrix = pixmat(buf, self.W, self.H, bpp, true)
 
         self.tick = 0
         self.frame_div = 2  # adjust for speed

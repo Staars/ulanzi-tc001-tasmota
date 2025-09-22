@@ -2,7 +2,7 @@
 
 #-
  - LED driver for Ulanzi clock written in Berry
- - Matrix rain animation using Matrix + blit()
+ - Matrix rain animation using pixmat + blit()
  - Uses packed integer hex colours
 -#
 
@@ -17,15 +17,15 @@ class MATRIX_ANIM
     def init()
         import crypto
 
-        # Create LED strip and wrap in Matrix (serpentine handled in C++)
+        # Create LED strip and wrap in pixmat (serpentine handled in C++)
         self.strip = Leds(32 * 8, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, 32, 8, bpp, true)
+        self.matrix = pixmat(buf, 32, 8, bpp, true)
 
         # Create a 1×4 drop pattern (head bright green, tail dimmer)
         # Allocate exact size: width × height × bpp
-        self.drop = Matrix(1, 4, bpp, false)
+        self.drop = pixmat(1, 4, bpp, false)
         self.drop.set(0, 0, 0x001800)  # head
         self.drop.set(0, 1, 0x001200)  # tail 1
         self.drop.set(0, 2, 0x000a00)  # tail 2

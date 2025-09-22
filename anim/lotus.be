@@ -20,7 +20,7 @@ class LOTUS_EFFECT
 
         self.strip = Leds(self.cols * self.rows, gpio.pin(gpio.WS2812, 2))
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, self.cols, self.rows, self.strip.pixel_size(), true)
+        self.matrix = pixmat(buf, self.cols, self.rows, self.strip.pixel_size(), true)
 
         # Allocate rMap arrays
         self.rMap_angle = []

@@ -30,13 +30,13 @@ class SPECTRUM_ANALYZER_RANDOM
     var rng_seed
 
     def init()
-        # LED strip + Matrix
+        # LED strip + pixmat
         self.cols = 32
         self.rows = 8
         self.strip = Leds(self.cols * self.rows, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, self.cols, self.rows, bpp, true)
+        self.matrix = pixmat(buf, self.cols, self.rows, bpp, true)
 
         # Analyzer layout
         self.bands = 8

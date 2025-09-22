@@ -10,11 +10,11 @@ class AURORA_DUAL_WAVES
     var fast_loop_closure
 
     def init()
-        # LED strip + Matrix
+        # LED strip + pixmat
         self.strip = Leds(32 * 8, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, 32, 8, bpp, true)
+        self.matrix = pixmat(buf, 32, 8, bpp, true)
 
         self.tick = 0
         self.frame_div = 1  # update every fast_loop tick

@@ -11,7 +11,7 @@ class TWINKLE
         self.strip = Leds(self.W * self.H, gpio.pin(gpio.WS2812, 32))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, self.W, self.H, bpp, true)
+        self.matrix = pixmat(buf, self.W, self.H, bpp, true)
 
         self.hue_buf = bytes(-(self.W * self.H))
         self.val_buf = bytes(-(self.W * self.H))

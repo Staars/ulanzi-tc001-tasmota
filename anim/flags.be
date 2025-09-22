@@ -20,7 +20,7 @@ class FLAGS_EFFECT
         self.strip = Leds(self.cols * self.rows, gpio.pin(gpio.WS2812, 2))
         var bpp = self.strip.pixel_size()
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, self.cols, self.rows, bpp, true)
+        self.matrix = pixmat(buf, self.cols, self.rows, bpp, true)
 
         self.thisVal = 0
         self.thisMax = 0

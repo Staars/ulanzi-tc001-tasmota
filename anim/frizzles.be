@@ -17,12 +17,12 @@ class FRIZZLES
         self.rows = 8
         self.strip = Leds(self.cols * self.rows, gpio.pin(gpio.WS2812, 2))
         var buf = self.strip.pixels_buffer()
-        self.matrix = Matrix(buf, self.cols, self.rows, self.strip.pixel_size(), true)
+        self.matrix = pixmat(buf, self.cols, self.rows, self.strip.pixel_size(), true)
 
         # 3×3 cross bit pattern: b010, b111, b010 → 0x40, 0xE0, 0x40
         var sprite_buf = bytes("40E040")
         var bytes_per_line = 1
-        self.cross_sprite = Matrix(sprite_buf, bytes_per_line)
+        self.cross_sprite = pixmat(sprite_buf, bytes_per_line)
 
         # Per-dot brightness (all start bright)
         self.dot_bri = bytes("FFFFFFFFFFFFFFFF")
